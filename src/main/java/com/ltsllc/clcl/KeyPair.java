@@ -45,9 +45,24 @@ public class KeyPair {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 
-    public KeyPair(PublicKey publicKey, PrivateKey privateKey) {
+    public KeyPair (java.security.KeyPair keyPair, String distinguishedNameString) {
+        DistinguishedName distinguishedName = new DistinguishedName(distinguishedNameString);
+
+        publicKey = new PublicKey(keyPair.getPublic());
+        publicKey.setDn(distinguishedName);
+
+        privateKey = new PrivateKey(keyPair.getPrivate());
+        privateKey.setDn(distinguishedName);
+    }
+
+    public KeyPair(PublicKey publicKey, PrivateKey privateKey, String distinguishedNameString) {
+        DistinguishedName distinguishedName = new DistinguishedName(distinguishedNameString);
+
         this.publicKey = publicKey;
+        this.publicKey.setDn(distinguishedName);
+
         this.privateKey = privateKey;
+        this.privateKey.setDn(distinguishedName);
     }
 
     public PrivateKey getPrivateKey() {
@@ -58,13 +73,13 @@ public class KeyPair {
         return publicKey;
     }
 
-    public static KeyPair newKeys() throws EncryptionException {
+    public static KeyPair newKeys(String distinguishedName) throws EncryptionException {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
             java.security.KeyPair keyPair = keyPairGenerator.generateKeyPair();
             PublicKey publicKey = new PublicKey(keyPair.getPublic());
             PrivateKey privateKey = new PrivateKey(keyPair.getPrivate());
-            return new KeyPair(publicKey, privateKey);
+            return new KeyPair(publicKey, privateKey, distinguishedName);
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Exception trying to generate new keys", e);
         }
@@ -86,7 +101,7 @@ public class KeyPair {
         }
     }
 
-    public static KeyPair fromPem(String pem) throws EncryptionException {
+    public static KeyPair fromPem(String pem, String distinguishedName) throws EncryptionException {
         try {
             StringReader stringReader = new StringReader(pem);
             PEMParser pemParser = new PEMParser(stringReader);
@@ -96,7 +111,7 @@ public class KeyPair {
             java.security.KeyPair keyPair = jcaPEMKeyConverter.getKeyPair(pemKeyPair);
             PublicKey publicKey = new PublicKey(keyPair.getPublic());
             PrivateKey privateKey = new PrivateKey(keyPair.getPrivate());
-            return new KeyPair(publicKey, privateKey);
+            return new KeyPair(publicKey, privateKey, distinguishedName);
         } catch (IOException e) {
             throw new EncryptionException("Exception trying to create PEM", e);
         }
@@ -136,7 +151,7 @@ public class KeyPair {
         }
     }
 
-    public static KeyPair fromPem(String pem, String password) throws EncryptionException {
+    public static KeyPair fromPem(String pem, String password, String distinguishedName) throws EncryptionException {
         try {
             StringReader stringReader = new StringReader(pem);
             PEMParser pemParser = new PEMParser(stringReader);
@@ -146,7 +161,7 @@ public class KeyPair {
             java.security.KeyPair keyPair = jcaPEMKeyConverter.getKeyPair(pemKeyPair);
             PublicKey publicKey = new PublicKey(keyPair.getPublic());
             PrivateKey privateKey = new PrivateKey(keyPair.getPrivate());
-            return new KeyPair(publicKey, privateKey);
+            return new KeyPair(publicKey, privateKey, distinguishedName);
         } catch (IOException e) {
             throw new EncryptionException("Exception reading PEM", e);
         }

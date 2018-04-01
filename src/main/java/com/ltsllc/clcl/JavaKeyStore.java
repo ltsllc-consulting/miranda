@@ -98,7 +98,7 @@ public class JavaKeyStore {
      * Create an instance with no password.
      */
     public JavaKeyStore(String filename) throws EncryptionException {
-        initialize(filename, null);
+        initialize(filename, null, null);
     }
 
     /**
@@ -108,8 +108,8 @@ public class JavaKeyStore {
      * @param password The password for the JKS file.  This is also used for the passwords for the keys.
      * @throws EncryptionException If there is a problem loading the JKS file.
      */
-    public JavaKeyStore(String filename, String password) throws EncryptionException {
-        initialize(filename, password);
+    public JavaKeyStore(String filename, String password, String distinguishedName) throws EncryptionException {
+        initialize(filename, password, distinguishedName);
     }
 
     /**
@@ -124,14 +124,14 @@ public class JavaKeyStore {
      * @param password The password for the JKS file.  This is also used for the passwords for the keys.
      * @throws EncryptionException If there is a problem loading the JKS file.
      */
-    public void initialize(String filename, String password) throws EncryptionException {
+    public void initialize(String filename, String password, String distinguishedName) throws EncryptionException {
         this.filename = filename;
         this.certificates = new HashMap<String, Certificate>();
         this.certificateChains = new HashMap<String, Certificate[]>();
         this.keys = new HashMap<String, KeyPair>();
         this.passwordString = password;
 
-        load();
+        load(distinguishedName);
     }
 
     public Map<String, KeyPair> getKeys() {
@@ -309,7 +309,7 @@ public class JavaKeyStore {
     /**
      * @throws EncryptionException
      */
-    public void load() throws EncryptionException {
+    public void load(String distinguishedName) throws EncryptionException {
         File file = new File(filename);
         if (!file.exists()) {
             throw new EncryptionException("The file, " + filename + ", does not exist");
@@ -320,8 +320,9 @@ public class JavaKeyStore {
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             fileInputStream = new FileInputStream(file);
+
             keyStore.load(fileInputStream, getPasswordString().toCharArray());
-            extract(keyStore);
+            extract(keyStore, distinguishedName);
         } catch (GeneralSecurityException | IOException e) {
             throw new EncryptionException("Exception trying to load keystore, " + filename, e);
         } finally {
@@ -329,12 +330,12 @@ public class JavaKeyStore {
         }
     }
 
-    public void extract(KeyStore keyStore) throws EncryptionException {
-        extractKeys(keyStore);
+    public void extract(KeyStore keyStore, String distinguishedName) throws EncryptionException {
+        extractKeys(keyStore, distinguishedName);
         extractCertificates(keyStore);
     }
 
-    public void extractKeys(KeyStore keyStore) throws EncryptionException {
+    public void extractKeys(KeyStore keyStore, String distinguishedName) throws EncryptionException {
         try {
             Enumeration<String> enumeration = keyStore.aliases();
 
@@ -346,14 +347,15 @@ public class JavaKeyStore {
                 if (privateKey == null)
                     continue;
 
-                extractKeys(keyStore, alias, privateKey);
+                extractKeys(keyStore, alias, privateKey, distinguishedName);
             }
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Exception extracting keys", e);
         }
     }
 
-    public void extractKeys(KeyStore keyStore, String alias, java.security.PrivateKey jsPrivateKey) throws EncryptionException {
+    public void extractKeys(KeyStore keyStore, String alias, java.security.PrivateKey jsPrivateKey,
+                            String distinguishedName) throws EncryptionException {
         try {
             java.security.cert.Certificate[] certificates = keyStore.getCertificateChain(alias);
             Certificate[] chain = toClclChain(certificates);
@@ -361,7 +363,7 @@ public class JavaKeyStore {
             java.security.PublicKey jsPublicKey = certificates[0].getPublicKey();
             PublicKey publicKey = new PublicKey(jsPublicKey);
             PrivateKey privateKey = new PrivateKey(jsPrivateKey);
-            KeyPair keyPair = new KeyPair(publicKey, privateKey);
+            KeyPair keyPair = new KeyPair(publicKey, privateKey, distinguishedName);
             getKeys().put(alias, keyPair);
         } catch (GeneralSecurityException e) {
             throw new EncryptionException("Exception extracting keys", e);

@@ -29,10 +29,13 @@ public class TestKey extends EncryptionTestCase {
     public static final String TEST_ALGORITHM = "AES";
     public static final String TEST_MESSAGE = "TEST";
     public static final String TEST_PASSWORD = "whatever";
+    public static final String TEST_DISTINGUISHED_NAME
+            = "c=United States of America,st=Colorado,l=Denver,o=whatever,ou=Development,cn=whatever";
+
 
     @Before
     public void setup () throws Exception {
-        KeyPair keyPair = KeyPair.newKeys();
+        KeyPair keyPair = KeyPair.newKeys(TEST_DISTINGUISHED_NAME);
         setPublicKey(keyPair.getPublicKey());
         setPrivateKey(keyPair.getPrivateKey());
     }

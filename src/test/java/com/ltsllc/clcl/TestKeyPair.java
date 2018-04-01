@@ -23,9 +23,13 @@ import org.junit.Test;
 
 public class TestKeyPair extends EncryptionTestCase {
     public static final String TEST_PASSWORD = "whatever";
+    public static final String TEST_DISTINGUISHED_NAME
+            = "c=United States of America,st=Colorado,l=Denver,o=whatever,ou=Development,cn=whatever";
+
+
     @Before
     public void setup () throws EncryptionException {
-        creaateKeyPair();
+        createKeyPair(TEST_DISTINGUISHED_NAME);
     }
 
     @Test
@@ -37,14 +41,14 @@ public class TestKeyPair extends EncryptionTestCase {
     @Test
     public void testToPemNoPassword () throws EncryptionException{
         String pem = getKeyPair().toPem();
-        KeyPair keyPair = KeyPair.fromPem(pem);
+        KeyPair keyPair = KeyPair.fromPem(pem, TEST_DISTINGUISHED_NAME);
         assert (getKeyPair().equals(keyPair));
     }
 
     @Test
     public void testToPemWithPassword () throws EncryptionException {
         String pem = getKeyPair().toPem(TEST_PASSWORD);
-        KeyPair keyPair = KeyPair.fromPem(pem, TEST_PASSWORD);
+        KeyPair keyPair = KeyPair.fromPem(pem, TEST_DISTINGUISHED_NAME);
         assert (getKeyPair().equals(keyPair));
     }
 }

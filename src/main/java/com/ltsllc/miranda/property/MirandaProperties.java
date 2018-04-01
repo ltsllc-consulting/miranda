@@ -109,20 +109,21 @@ public class MirandaProperties {
 
     public static final String DELIVERY_PACKAGE = PACKAGE_NAME + "delivery,";
 
-    public static final String PROPERTY_DELAY_BETWEEN_RETRIES = "com.ltsllc.miranda.DelayBetweenRetries";
-    public static final String PROPERTY_DELIVERY_DIRECTORY = "com.ltsllc.miranda.DeliveryDirectory";
+    public static final String PROPERTY_DISTINGUISHED_NAME = PACKAGE_NAME + "DistinguishedName";
+    public static final String PROPERTY_DELAY_BETWEEN_RETRIES = PACKAGE_NAME  + "DelayBetweenRetries";
+    public static final String PROPERTY_DELIVERY_DIRECTORY = PACKAGE_NAME + "DeliveryDirectory";
     public static final String PROPERTY_FILE_CHECK_PERIOD = PACKAGE_NAME + "FileCheckPeriod";
     public static final String PROPERTY_GARBAGE_COLLECTION_PERIOD = PACKAGE_NAME + "GarbageCollectionPeriod";
-    public static final String PROPERTY_LOG4J_FILE = "com.ltsllc.miranda.Log4jFile";
+    public static final String PROPERTY_LOG4J_FILE = PACKAGE_NAME + "Log4jFile";
     public static final String PROPERTY_MAX_WRITE_FAILURES = PACKAGE_NAME + "MaxWriteFailures";
-    public static final String PROPERTY_MESSAGES_DIRECTORY = "com.ltsllc.miranda.MessageDirectory";
-    public static final String PROPERTY_MESSAGE_FILE_SIZE = "com.ltsllc.miranda.MessageFileSize";
-    public static final String PROPERTY_MESSAGE_PORT = "com.ltsllc.miranda.MessagePort";
+    public static final String PROPERTY_MESSAGES_DIRECTORY = PACKAGE_NAME + "MessageDirectory";
+    public static final String PROPERTY_MESSAGE_FILE_SIZE = PACKAGE_NAME + "MessageFileSize";
+    public static final String PROPERTY_MESSAGE_PORT = PACKAGE_NAME + "MessagePort";
     public static final String PROPERTY_NETWORK = PACKAGE_NAME + "Network";
     public static final String PROPERTY_PROPERTIES_FILE = PACKAGE_NAME + "PropertiesFile";
-    public static final String PROPERTY_SUBSCRIPTIONS_FILE = "com.ltsllc.miranda.SubscriptionsFile";
-    public static final String PROPERTY_TOPICS_FILE = "com.ltsllc.miranda.TopicsFile";
-    public static final String PROPERTY_USERS_FILE = "com.ltsllc.miranda.UsersFile";
+    public static final String PROPERTY_SUBSCRIPTIONS_FILE = PACKAGE_NAME + "SubscriptionsFile";
+    public static final String PROPERTY_TOPICS_FILE = PACKAGE_NAME + "TopicsFile";
+    public static final String PROPERTY_USERS_FILE = PACKAGE_NAME + "UsersFile";
 
     public static final String PROPERTY_CLUSTER_FILE = CLUSTER_PACKAGE + "File";
     public static final String PROPERTY_CLUSTER_HEALTH_CHECK_PERIOD = CLUSTER_PACKAGE + "HealthCheckPeriod";

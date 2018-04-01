@@ -40,8 +40,8 @@ public class EncryptionTestCase extends TestCase {
         this.keyPair = keyPair;
     }
 
-    public void creaateKeyPair() throws EncryptionException {
-        this.keyPair = KeyPair.newKeys();
+    public void createKeyPair(String distinguishedName) throws EncryptionException {
+        this.keyPair = KeyPair.newKeys(distinguishedName);
     }
 
     public Certificate getCertificate() {
@@ -89,7 +89,7 @@ public class EncryptionTestCase extends TestCase {
         return dn;
     }
 
-    public KeyPair createKeyPair(int keySize) throws GeneralSecurityException {
+    public KeyPair createKeyPair(int keySize, String distinguishedName) throws GeneralSecurityException {
         DistinguishedName dn = createDn();
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -104,11 +104,11 @@ public class EncryptionTestCase extends TestCase {
         setPublicKey(publicKey);
         setPrivateKey(privateKey);
 
-        return new KeyPair(publicKey, privateKey);
+        return new KeyPair(publicKey, privateKey, distinguishedName);
     }
 
-    public Certificate createCertificate() throws GeneralSecurityException, EncryptionException {
-        KeyPair keyPair = createKeyPair(2048);
+    public Certificate createCertificate(String distinguishedName) throws GeneralSecurityException, EncryptionException {
+        KeyPair keyPair = createKeyPair(2048, distinguishedName);
 
         CertificateSigningRequest csr = keyPair.createCertificateSigningRequest();
 

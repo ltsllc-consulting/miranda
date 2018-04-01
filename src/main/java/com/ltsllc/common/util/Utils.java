@@ -18,6 +18,8 @@
 package com.ltsllc.common.util;
 
 
+import com.ltsllc.clcl.CertificateSigningRequest;
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Equivalent;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -28,6 +30,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
+import javax.crypto.KeyGenerator;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -39,6 +42,8 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -80,7 +85,28 @@ public class Utils {
         return certificate;
     }
 
+    /**
+     * Create a new key store and associate the supplied password with it.
+     *
+     * <p>
+     *     This method will try to create a new key store file.  If a file exists with
+     *     the same name it will instead throw an exception.
+     * </p>
+     * <p>
+     *      The file creates a public key and a private key and stores them in the new keystore.
+     *      Thereafter, the file can be used in method like {link}
+     * </p>
+     * @param filename
+     * @param passwordString
+     */
+    public static void createKeyStore (String filename, String passwordString) throws GeneralSecurityException {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(2048);
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
+
+
+    }
     public static KeyStore loadKeyStore(String filename, String passwordString)
             throws GeneralSecurityException, IOException {
         KeyStore keyStore = null;

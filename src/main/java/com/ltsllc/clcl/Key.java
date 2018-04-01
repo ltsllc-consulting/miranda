@@ -51,7 +51,7 @@ abstract public class Key implements Serializable {
     private DistinguishedName dn;
 
     public DistinguishedName getDn() {
-        return dn;
+       return dn;
     }
 
     public void setDn(DistinguishedName dn) {

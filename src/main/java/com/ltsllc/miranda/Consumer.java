@@ -125,16 +125,18 @@ public class Consumer extends Subsystem implements Comparer {
      * </p>
      */
     public void run() {
-        try {
-            State nextState = startCurrentState();
-            logger.info(this + " starting");
-        } catch (Exception e) {
-            ExceptionPanic panic = new ExceptionPanic(e, Panic.Reasons.ExceptionInStart);
-            Miranda.panicMiranda(panic);
-        }
+        logger.info (this + " starting");
 
         State nextState = null;
         State stop = StopState.getInstance();
+
+        try {
+            if (getCurrentState() != null)
+                getCurrentState().start();
+        } catch (RuntimeException e) {
+            StartupPanic startupPanic = new StartupPanic("Unchecked exception thrown in State.start", e,
+                    StartupPanic.StartupReasons.ExceptionInStart);
+        }
 
         while (nextState != stop && !Miranda.panicking && !getStopped()) {
             Message m = getNextMessage();

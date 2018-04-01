@@ -48,6 +48,9 @@ public class TestStartup extends TestCase {
         }
     }
 
+    public static final String TEST_DISTINGUISHED_NAME
+            = "c=United States of America,st=Colorado,l=Denver,o=whatever,ou=Development,cn=whatever";
+
     public static Logger logger = Logger.getLogger(TestStartup.class);
 
     public static class ShutdownException extends Error {
@@ -247,7 +250,7 @@ public class TestStartup extends TestCase {
             MirandaProperties mirandaProperties = new MirandaProperties();
             mirandaProperties.remove(MirandaProperties.PROPERTY_KEYSTORE_FILE);
             getStartup().setProperties(mirandaProperties);
-            getStartup().getKeys("whatever");
+            getStartup().getKeys("whatever", TEST_DISTINGUISHED_NAME);
         } catch (ShutdownException e) {
             shutdownException = e;
         }
@@ -265,7 +268,7 @@ public class TestStartup extends TestCase {
         mirandaProperties.remove(MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
         getStartup().setProperties(mirandaProperties);
         try {
-            getStartup().getKeys(getStartup().getKeystorePasswordString());
+            getStartup().getKeys(getStartup().getKeystorePasswordString(),TEST_DISTINGUISHED_NAME);
         } catch (ShutdownException e) {
             shutdownException = e;
         }
@@ -284,7 +287,7 @@ public class TestStartup extends TestCase {
             mirandaProperties.setProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE, "wrong");
             getStartup().setProperties(mirandaProperties);
 
-            getStartup().getKeys(getStartup().getKeystorePasswordString());
+            getStartup().getKeys(getStartup().getKeystorePasswordString(), TEST_DISTINGUISHED_NAME);
         } catch (ShutdownException e) {
             shutdownException = e;
         }
@@ -320,14 +323,13 @@ public class TestStartup extends TestCase {
         String filename = mirandaProperties.getProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE);
         createFile(filename, TEST_INVALID_KEYSTORE);
 
-        setupInputStream(TEST_KEYSTORE_PASSWORD);
-
         ShutdownException shutdownException = null;
 
         Miranda.getInstance().setPanicPolicy(new LocalPanicPolicy());
-        getStartup().setProperties(mirandaProperties);
+        Startup startup = (Startup) Miranda.getInstance().getCurrentState();
+        startup.setProperties(mirandaProperties);
         try {
-            getStartup().getKeys(getStartup().getKeystorePasswordString());
+            startup.getKeys(getStartup().getKeystorePasswordString(), TEST_DISTINGUISHED_NAME);
         } catch (ShutdownException e) {
             shutdownException = e;
         }
@@ -352,7 +354,7 @@ public class TestStartup extends TestCase {
 
         Miranda.getInstance().setPanicPolicy(getMockPanicPolicy());
         getStartup().setProperties(mirandaProperties);
-        getStartup().getKeys("whatever");
+        getStartup().getKeys("whatever", TEST_DISTINGUISHED_NAME);
 
         assert (shutdownException == null);
         assert (getStartup().getPublicKey() != null);

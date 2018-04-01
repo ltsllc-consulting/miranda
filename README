@@ -1,6 +1,6 @@
 WARNING!
 This is a non-functional release of Miranda!  Key functionality is (such as replicating information to the cluster)
-is missing!  A fully functional release is planned for 11/30/2017.
+is missing!  A fully functional release is planned for 9/30 2017.
 
 miranda --- a tool for creating reliable web services
 
@@ -24,7 +24,7 @@ Download the distribution(s)
 
 Download miranda from github at
 
-https://github.com/miranda-messaging/miranda
+https://github.com/ClarkHobbie/miranda
 
 Compile miranda
 
@@ -38,7 +38,7 @@ target\miranda-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
 Create a Certificate Authority
 
-openssl req -newkey rsa:2048 -x509 -keyout ca-key.pem.txt -out ca-certificate.pem.txt -days 365
+openssl req -config config -newkey rsa:2048 -x509 -keyout ca-key.pem.txt -out ca-certificate.pem.txt -days 365
 
 Create a tuststore
 

@@ -29,6 +29,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 
 public class CertificateSigningRequest {
     public static final String SIGNATURE_ALGORITHM = "SHA1WithRSA";

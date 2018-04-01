@@ -56,6 +56,7 @@ public class Panic extends Exception {
         ExceptionWaitingForNextConnection, // an exception was thrown while waiting for a new node
         ExceptionWritingFile,
         InvalidWakeup,
+        MissingArugment, // We are missing an argument on the command line
         NetworkThreadCrashed, // one of our network connections died
         Network, // We cannot communicate with anyone
         NullCurrentState, // The currentState is null for a consumer

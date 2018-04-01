@@ -577,9 +577,4 @@ public class Miranda extends Consumer {
 
         instance.panic(panic);
     }
-
-
-    public void run() {
-        super.run();
-    }
 }

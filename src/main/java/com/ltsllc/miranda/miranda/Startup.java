@@ -60,6 +60,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -100,6 +101,7 @@ public class Startup extends State {
     private LogLevel logLevel = LogLevel.NORMAL;
     private HttpServer httpServer;
     private MirandaCommandLine commandLine;
+    private String distinguishedName;
     private MirandaFactory factory;
     private MirandaProperties properties;
     private PublicKey publicKey;
@@ -110,6 +112,14 @@ public class Startup extends State {
     private Properties overrideProperties;
     private KeyStore keyStore;
     private KeyStore trustStore;
+
+    public String getDistinguishedName() {
+        return distinguishedName;
+    }
+
+    public void setDistinguishedName(String distinguishedName) {
+        this.distinguishedName = distinguishedName;
+    }
 
     public KeyStore getTrustStore() {
         return trustStore;
@@ -259,7 +269,7 @@ public class Startup extends State {
             processPasswords();
             setupProperties();
             setupKeyStores();
-            getKeys(getKeystorePasswordString());
+            getKeys(getKeystorePasswordString(), getDistinguishedName());
             startLogger();
             logProperties();
             startWriter();
@@ -315,16 +325,20 @@ public class Startup extends State {
         checkProperties(properties);
     }
 
-    public void getKeys(String password) throws EncryptionException {
-        checkProperties(MirandaProperties.PROPERTY_KEYSTORE_FILE, MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
-        String keyStoreFilename = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE);
+    public void getKeys(String password, String distinguishedName) throws ShutdownException {
+        try {
+            checkProperties(MirandaProperties.PROPERTY_KEYSTORE_FILE, MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
+            String keyStoreFilename = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE);
 
-        JavaKeyStore javaKeyStore = new JavaKeyStore(keyStoreFilename, password);
+            JavaKeyStore javaKeyStore = new JavaKeyStore(keyStoreFilename, password, distinguishedName);
 
-        String alias = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
-        KeyPair keyPair = javaKeyStore.getKeyPair(alias);
-        setPublicKey(keyPair.getPublicKey());
-        setPrivateKey(keyPair.getPrivateKey());
+            String alias = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
+            KeyPair keyPair = javaKeyStore.getKeyPair(alias);
+            setPublicKey(keyPair.getPublicKey());
+            setPrivateKey(keyPair.getPrivateKey());
+        } catch (EncryptionException e) {
+            throw new ShutdownException(e);
+        }
     }
 
     public ServletMapping[] convertToArray(List<ServletMapping> mappings) {
@@ -784,21 +798,20 @@ public class Startup extends State {
 
 
     public void processPasswords() {
-        if (null != getCommandLine().getPassword()) {
-            setKeystorePasswordString(getCommandLine().getPassword());
-        } else {
-            Scanner scanner = new Scanner(Miranda.inputStream);
-            String temp = scanner.nextLine();
-            setKeystorePasswordString(temp);
-        }
+        if (null == getCommandLine().getKeystorePassword())
+            error("Missing keystore password", StartupPanic.StartupReasons.MissingArgument);
+        else
+            setKeystorePasswordString(getCommandLine().getKeystorePassword());
 
-        if (null != getCommandLine().getTrustorePassword())
+        if (null == getCommandLine().getTrustorePassword())
+            error("Missing truststore password", StartupPanic.StartupReasons.MissingArgument);
+        else
             setTrustorePasswordString(getCommandLine().getTrustorePassword());
-        else {
-            Scanner scanner = new Scanner(Miranda.inputStream);
-            String temp = scanner.nextLine();
-            setTrustorePasswordString(temp);
-        }
+    }
+
+    public void error(String message, StartupPanic.StartupReasons reason) {
+        StartupPanic startupPanic = new StartupPanic(message, reason);
+        Miranda.panicMiranda(startupPanic);
     }
 
     public KeyStore loadKeyStore(String filename, String password) {

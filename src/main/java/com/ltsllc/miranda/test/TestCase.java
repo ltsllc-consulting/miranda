@@ -640,6 +640,13 @@ public class TestCase extends com.ltsllc.common.test.TestCase {
             f.delete();
 
             if (f.exists()) {
+                pause(1000);
+
+                System.out.println ("Failed first attempt to delete file.");
+                f.delete();
+            }
+
+            if (f.exists()) {
                 logger.error("Failed to delete " + f.getName());
                 Exception e = new Exception();
                 e.printStackTrace();

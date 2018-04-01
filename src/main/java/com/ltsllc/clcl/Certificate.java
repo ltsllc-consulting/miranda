@@ -21,10 +21,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateFactory;
@@ -89,5 +86,12 @@ public class Certificate {
 
     public DistinguishedName getIssuer() {
         return new DistinguishedName(getCertificate().getIssuerDN());
+    }
+
+    public void store (String filename) throws IOException {
+        String pem = toPem();
+        FileWriter fileWriter = new FileWriter(filename);
+        fileWriter.write(pem);
+        fileWriter.close();
     }
 }
