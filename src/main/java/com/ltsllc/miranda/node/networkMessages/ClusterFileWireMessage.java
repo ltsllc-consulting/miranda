@@ -17,7 +17,7 @@
 package com.ltsllc.miranda.node.networkMessages;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Version;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 
@@ -41,14 +41,14 @@ public class ClusterFileWireMessage extends WireMessage {
         return version;
     }
 
-    public ClusterFileWireMessage (byte[] file, Version version) {
+    public ClusterFileWireMessage(byte[] file, Version version) {
         super(WireSubjects.ClusterFile);
 
         this.content = Utils.bytesToString(file);
         this.version = version;
     }
 
-    public ClusterFileWireMessage (List<NodeElement> file, Version version) {
+    public ClusterFileWireMessage(List<NodeElement> file, Version version) {
         super(WireSubjects.ClusterFile);
 
         String json = ourGson.toJson(file);

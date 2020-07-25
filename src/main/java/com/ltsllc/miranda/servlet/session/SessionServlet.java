@@ -16,7 +16,7 @@
 
 package com.ltsllc.miranda.servlet.session;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.requests.Request;
 import com.ltsllc.miranda.clientinterface.results.ResultObject;
@@ -44,6 +44,7 @@ abstract public class SessionServlet extends MirandaServlet {
     abstract public ServletHolder getServletHolder();
 
     abstract public ResultObject createResultObject();
+
     private Session session;
 
     public Session getSession() {
@@ -54,7 +55,7 @@ abstract public class SessionServlet extends MirandaServlet {
         this.session = session;
     }
 
-    public User getUser () {
+    public User getUser() {
         return getSession().getUser();
     }
 

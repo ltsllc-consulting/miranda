@@ -19,11 +19,14 @@ package com.ltsllc.miranda.user;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.objects.UserObject;
 import com.ltsllc.miranda.file.SingleFile;
+import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.reader.Reader;
 import com.ltsllc.miranda.user.messages.NewUserMessage;
 import com.ltsllc.miranda.user.states.UsersFileStartingState;
@@ -55,7 +58,7 @@ public class UsersFile extends SingleFile<User> {
         ourInstance = usersFile;
     }
 
-    public UsersFile(com.ltsllc.miranda.reader.Reader reader, Writer writer, String filename) throws IOException {
+    public UsersFile(com.ltsllc.miranda.reader.Reader reader, Writer writer, String filename) throws IOException, MirandaException {
         super(filename, reader, writer);
 
         UsersFileStartingState usersFileStartingState = new UsersFileStartingState(this);
@@ -83,7 +86,7 @@ public class UsersFile extends SingleFile<User> {
         }
     }
 
-    public static synchronized void initialize(String filename, Reader reader, Writer writer) throws IOException {
+    public static synchronized void initialize(String filename, Reader reader, Writer writer) throws IOException, MirandaException {
         if (null == ourInstance) {
             ourInstance = new UsersFile(reader, writer, filename);
             ourInstance.start();
@@ -125,7 +128,7 @@ public class UsersFile extends SingleFile<User> {
         sendToMe(newUserMessage);
     }
 
-    public static List<UserObject> asUserObjects(List<User> users) throws IOException {
+    public static List<UserObject> asUserObjects(List<User> users) throws EncryptionException {
         List<UserObject> userObjects = new ArrayList<UserObject>();
         for (User user : users) {
             UserObject userObject = user.asUserObject();
@@ -140,8 +143,10 @@ public class UsersFile extends SingleFile<User> {
             List<UserObject> userObjects = asUserObjects(getData());
             String json = gson.toJson(userObjects);
             return json.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (EncryptionException e) {
+            Panic panic = new Panic("Exception during getBytes", e, Panic.Reasons.UncaughtException);
+            Miranda.panicMiranda(panic);
+            return null;
         }
     }
 

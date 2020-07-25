@@ -18,6 +18,7 @@ package com.ltsllc.miranda.session;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.miranda.messages.GarbageCollectionMessage;
@@ -34,11 +35,11 @@ public class SessionManagerReadyState extends State {
         return (SessionManager) getContainer();
     }
 
-    public SessionManagerReadyState(SessionManager sessionManager) {
+    public SessionManagerReadyState(SessionManager sessionManager) throws MirandaException {
         super(sessionManager);
     }
 
-    public State start () {
+    public State start() {
         long period = Miranda.properties.getLongProperty(MirandaProperties.PROPERTY_SESSION_GC_PERIOD, MirandaProperties.DEFAULT_SESSION_GC_PERIOD);
 
         GarbageCollectionMessage garbageCollectionMessage = new GarbageCollectionMessage(null, this);
@@ -48,7 +49,7 @@ public class SessionManagerReadyState extends State {
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getSessionManager().getCurrentState();
 
         switch (message.getSubject()) {
@@ -78,7 +79,7 @@ public class SessionManagerReadyState extends State {
 
             case GetSession: {
                 GetSessionMessage getSessionMessage = (GetSessionMessage) message;
-                nextState = processGetSessionMessage (getSessionMessage);
+                nextState = processGetSessionMessage(getSessionMessage);
                 break;
             }
 
@@ -109,13 +110,13 @@ public class SessionManagerReadyState extends State {
         return getSessionManager().getCurrentState();
     }
 
-    public State processSessionsExpiredMessage (SessionsExpiredMessage sessionsExpiredMessage) {
-        getSessionManager().expireSessions (sessionsExpiredMessage.getExpiredSessions());
+    public State processSessionsExpiredMessage(SessionsExpiredMessage sessionsExpiredMessage) {
+        getSessionManager().expireSessions(sessionsExpiredMessage.getExpiredSessions());
 
         return getSessionManager().getCurrentState();
     }
 
-    public State processCreateSessionMessage (CreateSessionMessage createSessionMessage) {
+    public State processCreateSessionMessage(CreateSessionMessage createSessionMessage) throws MirandaException {
         Session session = getSessionManager().createSession(createSessionMessage.getUser());
         CreateSessionResponseMessage response = new CreateSessionResponseMessage(getSessionManager().getQueue(),
                 this, Results.Success, session);
@@ -125,7 +126,7 @@ public class SessionManagerReadyState extends State {
         return getSessionManager().getCurrentState();
     }
 
-    public State processGetSessionMessage (GetSessionMessage getSessionMessage) {
+    public State processGetSessionMessage(GetSessionMessage getSessionMessage) throws MirandaException {
         Session session = getSessionManager().getSessionFor(getSessionMessage.getName());
 
         if (null == session) {
@@ -143,7 +144,7 @@ public class SessionManagerReadyState extends State {
         return getSessionManager().getCurrentState();
     }
 
-    public State processCheckSessionMessage (CheckSessionMessage checkSessionMessage) {
+    public State processCheckSessionMessage(CheckSessionMessage checkSessionMessage) throws MirandaException {
         Session session = getSessionManager().checkSession(checkSessionMessage.getSessionId());
 
         Results result;

@@ -16,8 +16,9 @@
 
 package com.ltsllc.miranda.mina;
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.network.ConnectionListener;
 import com.ltsllc.miranda.network.Network;
-import com.ltsllc.miranda.network.NetworkListener;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -33,7 +34,7 @@ import java.security.cert.Certificate;
 /**
  * Created by Clark on 3/6/2017.
  */
-public class MinaNetworkListener extends NetworkListener {
+public class MinaNetworkListener extends ConnectionListener {
     public static final String NAME = "listener";
 
     private static NioSocketAcceptor nioSocketAcceptor;
@@ -67,29 +68,29 @@ public class MinaNetworkListener extends NetworkListener {
         return truststore;
     }
 
-    public MinaNetworkListener(int port, KeyStore keyStore, String getKeyStorePassword, KeyStore truststore) {
+    public MinaNetworkListener(int port, KeyStore keyStore, String getKeyStorePassword, KeyStore truststore) throws MirandaException {
         super(port);
         this.keystore = keyStore;
         this.keyStorePassword = getKeyStorePassword;
         this.truststore = truststore;
     }
 
-    public static void allStopListening () {
+    public static void allStopListening() {
         if (null != getNioSocketAcceptor()) {
             getNioSocketAcceptor().unbind();
             setNioSocketAcceptor(null);
         }
     }
 
-    public void stopListening () {
+    public void stopListening() {
         stop();
     }
 
-    public void stop () {
+    public void stop() {
         getThread().interrupt();
     }
 
-    public void basicStart () throws Exception {
+    public void basicStart() throws Exception {
         NioSocketAcceptor nioSocketAcceptor = new NioSocketAcceptor();
         setNioSocketAcceptor(nioSocketAcceptor);
 
@@ -98,7 +99,7 @@ public class MinaNetworkListener extends NetworkListener {
         keyManagerFactory.init(getKeystore(), getKeyStorePassword().toCharArray());
 
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init (getTruststore());
+        trustManagerFactory.init(getTruststore());
 
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
         SslFilter sslFilter = new SslFilter(sslContext);
@@ -117,7 +118,7 @@ public class MinaNetworkListener extends NetworkListener {
 
     }
 
-    public void start () {
+    public void start() {
         try {
             basicStart();
         } catch (Exception e) {
@@ -125,7 +126,7 @@ public class MinaNetworkListener extends NetworkListener {
         }
     }
 
-    public void newConnection (IoSession session) {
+    public void newConnection(IoSession session) {
 
     }
 

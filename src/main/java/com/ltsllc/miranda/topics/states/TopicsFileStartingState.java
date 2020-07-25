@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.topics.states;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.states.SingleFileStartingState;
 import com.ltsllc.miranda.topics.TopicsFile;
 
@@ -24,15 +25,15 @@ import com.ltsllc.miranda.topics.TopicsFile;
  * Created by Clark on 5/18/2017.
  */
 public class TopicsFileStartingState extends SingleFileStartingState {
-    public TopicsFile getTopicsFile () {
+    public TopicsFile getTopicsFile() {
         return (TopicsFile) getContainer();
     }
 
-    public TopicsFileStartingState (TopicsFile topicsFile) {
+    public TopicsFileStartingState(TopicsFile topicsFile) throws MirandaException {
         super(topicsFile);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new TopicsFileReadyState(getTopicsFile());
     }
 }

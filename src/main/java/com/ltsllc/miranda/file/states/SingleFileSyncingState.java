@@ -20,10 +20,12 @@ import com.google.gson.Gson;
 import com.ltsllc.miranda.Consumer;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.SingleFile;
 import com.ltsllc.miranda.file.messages.GetFileResponseMessage;
 import com.ltsllc.miranda.node.messages.GetFileMessage;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -32,32 +34,41 @@ import java.util.List;
  */
 abstract public class SingleFileSyncingState extends State {
     abstract public Type getListType();
-    abstract public State getReadyState();
+
+    abstract public State getReadyState() throws MirandaException;
+
     abstract public List getData();
+
     abstract public boolean contains(Object o);
+
     abstract public SingleFile getFile();
+
     abstract public String getName();
 
     private static Gson ourGson = new Gson();
 
-    public SingleFileSyncingState (Consumer consumer) {
+    public SingleFileSyncingState(Consumer consumer) throws MirandaException {
         super(consumer);
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
             case GetFileResponse: {
                 GetFileResponseMessage getFileResponseMessage = (GetFileResponseMessage) message;
-                nextState = processGetFileResponse (getFileResponseMessage);
+                try {
+                    nextState = processGetFileResponse(getFileResponseMessage);
+                } catch (IOException ioException) {
+                    throw new MirandaException(ioException);
+                }
                 break;
             }
 
             case GetFile: {
                 GetFileMessage getFileMessage = (GetFileMessage) message;
-                nextState = processGetFileMessage (getFileMessage);
+                nextState = processGetFileMessage(getFileMessage);
                 break;
             }
 
@@ -70,14 +81,16 @@ abstract public class SingleFileSyncingState extends State {
     }
 
 
-    public State processGetFileResponse (GetFileResponseMessage getFileResponseMessage) {
+    public State processGetFileResponse(GetFileResponseMessage getFileResponseMessage)
+            throws IOException
+    {
         List list = ourGson.fromJson(getFileResponseMessage.getContents(), getListType());
         getFile().merge(list);
 
         return this;
     }
 
-    private State processGetFileMessage (GetFileMessage getFileMessage) {
+    private State processGetFileMessage(GetFileMessage getFileMessage) throws MirandaException {
         GetFileResponseMessage getFileResponseMessage = new GetFileResponseMessage(getFile().getQueue(), this, getName(),
                 getFile().getBytes());
 

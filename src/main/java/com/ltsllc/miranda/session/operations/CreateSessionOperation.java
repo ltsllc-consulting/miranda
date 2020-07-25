@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.session.operations;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.operations.Operation;
 import com.ltsllc.miranda.session.Session;
@@ -33,7 +34,7 @@ public class CreateSessionOperation extends Operation {
         return user;
     }
 
-    public CreateSessionOperation (BlockingQueue<Message> requester, Session session, String user) {
+    public CreateSessionOperation(BlockingQueue<Message> requester, Session session, String user) throws MirandaException {
         super("create session operations", requester, session);
 
         CreateSessionOperationReadyState readyState = new CreateSessionOperationReadyState(this);
@@ -42,7 +43,7 @@ public class CreateSessionOperation extends Operation {
         this.user = user;
     }
 
-    public void start () {
+    public void start() {
         super.start();
 
         Miranda.getInstance().getUserManager().sendGetUser(getQueue(), this, getUser());

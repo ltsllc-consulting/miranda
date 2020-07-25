@@ -18,6 +18,7 @@ package com.ltsllc.miranda.event;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.directory.MirandaDirectory;
 import com.ltsllc.miranda.directory.MirandaDirectoryLoadingState;
@@ -37,15 +38,15 @@ import java.util.List;
 public class EventDirectory extends MirandaDirectory<Event> {
     private static Gson gson = new Gson();
 
-    public byte[] getBytes () {
+    public byte[] getBytes() {
         throw new RuntimeException("not implemented");
     }
 
-    public List getData () {
+    public List getData() {
         return new ArrayList(getMap().values());
     }
 
-    public EventDirectory (String directoryName, int objectLimit, Reader reader, Writer writer) throws IOException {
+    public EventDirectory(String directoryName, int objectLimit, Reader reader, Writer writer) throws IOException, MirandaException {
         super(directoryName, objectLimit, reader, writer);
 
         MirandaDirectoryLoadingState mirandaDirectoryLoadingState = new MirandaDirectoryLoadingState(this);
@@ -54,15 +55,16 @@ public class EventDirectory extends MirandaDirectory<Event> {
 
     public static final String EVENT_FILE = ".event";
 
-    public boolean isInteresting (String name) {
+    public boolean isInteresting(String name) {
         return name.endsWith(EVENT_FILE);
     }
 
-    public Type getListType () {
-        return new TypeToken<List<Event>>(){}.getType();
+    public Type getListType() {
+        return new TypeToken<List<Event>>() {
+        }.getType();
     }
 
-    public void addFile (String filename, byte[] data) {
+    public void addFile(String filename, byte[] data) {
         if (getMap().size() >= getObjectLimit())
             return;
 

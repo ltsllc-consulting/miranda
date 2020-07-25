@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.mina;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.network.Handle;
 import com.ltsllc.miranda.network.NetworkReadyState;
 import com.ltsllc.miranda.test.TestCase;
@@ -328,7 +329,7 @@ public class TestMinaNetwork extends TestCase {
 
 
 
-    public void reset() {
+    public void reset() throws MirandaException {
         super.reset();
 
         mockKeyStore = null;
@@ -382,14 +383,20 @@ public class TestMinaNetwork extends TestCase {
 
     @Test
     public void testConstructor() {
+        pause(500);
         assert (getMinaNetwork().getCurrentState() instanceof NetworkReadyState);
+        pause(500);
     }
 
     @Test
     public void testBasicConnectTo() throws Exception {
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
 
+        pause(500);
+
         setupMinaListener(6789, getKeyStore(), getTrustStore(), TEMP_KEYSTORE_PASSWORD);
+
+        pause(500);
 
         Handle handle = getMinaNetwork().basicConnectTo("localhost", 6789);
 
@@ -410,5 +417,7 @@ public class TestMinaNetwork extends TestCase {
         Handle handle = getMinaNetwork().createHandle(getMockIoSession());
 
         assert (handle instanceof MinaHandle);
+
+        pause(500);
     }
 }

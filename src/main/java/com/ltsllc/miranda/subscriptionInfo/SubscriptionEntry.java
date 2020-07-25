@@ -1,28 +1,25 @@
 package com.ltsllc.miranda.subscriptionInfo;
 
-import com.ltsllc.miranda.clientinterface.basicclasses.DirectoryEntry;
-import com.ltsllc.miranda.clientinterface.basicclasses.Event;
-import com.ltsllc.miranda.clientinterface.basicclasses.Matchable;
-import com.ltsllc.miranda.clientinterface.basicclasses.MirandaObject;
+import com.ltsllc.miranda.clientinterface.basicclasses.*;
 import com.ltsllc.miranda.file.Updateable;
 
 /**
  * An {@link Event} and when (if) it was delivered ({@link com.ltsllc.miranda.clientinterface.basicclasses.Delivery}).
- *
+ * <p>
  * This class represents an Event and, if it has been delivered, when it was Delivered.
  * A subscription has one of these for each Event of interest to the Subscription.
- *
+ * <p>
  * If the Delivery for the instance is null, then the event hasn't been delivered yet.
- *
+ * <p>
  * <h3>PROPERTIES</h3>
  * <ul>
- *     <li>event - The GUID of the Event that this instance pertains to.
- *     This property should always contain a meaningful value.</li>
- *     <li>delivery - The GUID of the Delivery for this Event.  A null value
- *     signifies that the Event hasn't been delivered yet.</li>
+ * <li>event - The GUID of the Event that this instance pertains to.
+ * This property should always contain a meaningful value.</li>
+ * <li>delivery - The GUID of the Delivery for this Event.  A null value
+ * signifies that the Event hasn't been delivered yet.</li>
  * </ul>
  */
-public class SubscriptionEntry extends MirandaObject implements DirectoryEntry, Updateable<SubscriptionEntry>, Matchable {
+public class SubscriptionEntry extends MirandaObject implements DirectoryEntry, Updateable<SubscriptionEntry>, Equivalent {
     private String event;
     private String delivery;
 
@@ -49,7 +46,7 @@ public class SubscriptionEntry extends MirandaObject implements DirectoryEntry, 
         return event;
     }
 
-    public void setEvent (String guid) {
+    public void setEvent(String guid) {
         this.event = guid;
     }
 
@@ -99,8 +96,8 @@ public class SubscriptionEntry extends MirandaObject implements DirectoryEntry, 
      *
      * @see SubscriptionEntry#isEquivalentTo(DirectoryEntry)
      */
-    @Override
-    public boolean matches(Object o) {
+
+    public boolean isEquivalentTo(Object o) {
         if (null == o)
             return false;
 
@@ -110,5 +107,9 @@ public class SubscriptionEntry extends MirandaObject implements DirectoryEntry, 
         SubscriptionEntry other = (SubscriptionEntry) o;
 
         return isEquivalentTo(other);
+    }
+
+    public void copyFrom(Mergeable mergeable) {
+
     }
 }

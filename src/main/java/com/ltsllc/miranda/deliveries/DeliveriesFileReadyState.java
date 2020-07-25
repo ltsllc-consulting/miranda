@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.deliveries;
 
 import com.google.gson.reflect.TypeToken;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Delivery;
 import com.ltsllc.miranda.file.states.SingleFileReadyState;
 
@@ -30,20 +31,21 @@ import java.util.List;
 public class DeliveriesFileReadyState extends SingleFileReadyState {
     public static final String NAME = "deliveries file";
 
-    public DeliveriesFile getDeliveriesFile () {
+    public DeliveriesFile getDeliveriesFile() {
         return (DeliveriesFile) getContainer();
     }
 
-    public String getName () {
+    public String getName() {
         return NAME;
     }
 
-    public DeliveriesFileReadyState (DeliveriesFile deliveriesFile) {
+    public DeliveriesFileReadyState(DeliveriesFile deliveriesFile) throws MirandaException {
         super(deliveriesFile);
     }
 
-    public Type getListType () {
-        return new TypeToken<List<Delivery>> () {}.getType();
+    public Type getListType() {
+        return new TypeToken<List<Delivery>>() {
+        }.getType();
     }
 
     public List getPerishables() {

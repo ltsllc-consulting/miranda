@@ -17,11 +17,13 @@
 package com.ltsllc.miranda.file;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 import com.ltsllc.miranda.cluster.ClusterFile;
+import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.test.NodeElementFileCreator;
 import com.ltsllc.miranda.test.TestCase;
 import org.junit.After;
@@ -63,7 +65,7 @@ public class TestSingleFile extends TestCase {
         return queue;
     }
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
 
         this.queue = null;
@@ -71,15 +73,18 @@ public class TestSingleFile extends TestCase {
     }
 
     @Before
-    public void setup () {
+    public void setup () throws MirandaException {
         super.setup();
 
         setuplog4j();
         setupMirandaProperties();
         setupDirectory();
         setupRandomFile();
+        setupMockMiranda();
+        setupMockReader();
 
         try {
+            when(Miranda.getInstance().getReader()).thenReturn(getMockReader());
             this.singleFile = new ClusterFile(TEST_FILE, getMockReader(), getMockWriter(), getQueue());
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,11 +134,11 @@ public class TestSingleFile extends TestCase {
         }
     }
 
-    private static final String TEST_FILE_CONTENTS = "5B0A20207B0A2020202022646E73223A2022666F6F2E636F6D222C0A20202020226970223A20223139322E3136382E312E31222C0A2020202022706F7274223A20363738392C0A20202020226465736372697074696F6E223A202261206E6F6465222C0A20202020226C617374436F6E6E6563746564223A202D310A20207D0A5D";
+    private static final String TEST_FILE_CONTENTS = "5B0A20207B0A2020202022646E73223A2022666F6F2E636F6D222C0A2020202022706F7274223A20363738392C0A20202020226465736372697074696F6E223A202261206E6F6465222C0A20202020226C617374436F6E6E6563746564223A202D310A20207D0A5D";
     private static final String TEST_FILENAME2 = TEST_DIRECTORY + "/test2";
 
     @Test
-    public void testLoad () throws IOException {
+    public void testLoad () throws IOException, MirandaException {
         NodeElement nodeElement = new NodeElement("foo.com", 6789, "a node");
         List<NodeElement> nodeElementList = new ArrayList<NodeElement>();
         nodeElementList.add(nodeElement);
@@ -158,14 +163,11 @@ public class TestSingleFile extends TestCase {
         NodeElement nodeElement = new NodeElement("foo.com", 6789, "a node");
         List<NodeElement> nodeElementList = new ArrayList<NodeElement>();
         nodeElementList.add(nodeElement);
-
-        this.singleFile = new ClusterFile(TEST_FILE, getMockReader(), getMockWriter(), getQueue());
         getSingleFile().setData(nodeElementList);
 
         byte[] data = getSingleFile().getBytes();
         String s = Utils.bytesToString(data);
 
-        String s2 = Utils.hexStringToString(s);
         assert (s.equals(TEST_FILE_CONTENTS));
     }
 
@@ -185,7 +187,7 @@ public class TestSingleFile extends TestCase {
     }
 
     @Test
-    public void testEquals () throws IOException {
+    public void testEquals () throws IOException, MirandaException {
         ImprovedRandom random = new ImprovedRandom(new SecureRandom());
         NodeElement nodeElement = NodeElement.random(random);
         List<NodeElement> nodeElementList = new ArrayList<NodeElement>();

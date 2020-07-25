@@ -17,21 +17,22 @@
 package com.ltsllc.miranda.subsciptions;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.states.SingleFileStartingState;
 
 /**
  * Created by Clark on 5/18/2017.
  */
 public class SubscriptionsFileStartingState extends SingleFileStartingState {
-    public SubscriptionsFile getSubscriptionsFile () {
+    public SubscriptionsFile getSubscriptionsFile() {
         return (SubscriptionsFile) getContainer();
     }
 
-    public SubscriptionsFileStartingState (SubscriptionsFile subscriptionsFile) {
+    public SubscriptionsFileStartingState(SubscriptionsFile subscriptionsFile) throws MirandaException {
         super(subscriptionsFile);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new SubscriptionsFileReadyState(getSubscriptionsFile());
     }
 }

@@ -1,6 +1,7 @@
 package com.ltsllc.miranda.operations.events;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.cluster.Cluster;
 import com.ltsllc.miranda.event.EventManager;
@@ -12,15 +13,15 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * Create a new event and distribute it to the Cluster.
- *
+ * <p>
  * This class represents the knowledge of how to create a new Miranda event.
  * This consists of
  * <ul>
- *     <li>Ensuring that the topic exists.</li>
- *     <li>Ensuring that the user can create event for that topic.</li>
- *     <li>If the topic's remote policy warrants it, waiting for a qourum of the other nodes to acknowledge the new event.</li>
- *     <li>If the topic's remote policy warrants it, waiting for a quorum of the other nodes to record the new event.</li>
- *     <li>Responding to the publisher</li>
+ * <li>Ensuring that the topic exists.</li>
+ * <li>Ensuring that the user can create event for that topic.</li>
+ * <li>If the topic's remote policy warrants it, waiting for a qourum of the other nodes to acknowledge the new event.</li>
+ * <li>If the topic's remote policy warrants it, waiting for a quorum of the other nodes to record the new event.</li>
+ * <li>Responding to the publisher</li>
  * </ul>
  */
 public class NewEventOperation extends Operation {
@@ -31,10 +32,10 @@ public class NewEventOperation extends Operation {
     private Cluster cluster;
     private Event event;
 
-    public NewEventOperation (EventManager eventManager, TopicManager topicManager, Cluster cluster, Session session,
-                              BlockingQueue<Message> requester, Event event) {
+    public NewEventOperation(EventManager eventManager, TopicManager topicManager, Cluster cluster, Session session,
+                             BlockingQueue<Message> requester, Event event) throws MirandaException {
 
-        super (NAME, requester, session);
+        super(NAME, requester, session);
 
         this.eventManager = eventManager;
         this.topicManager = topicManager;

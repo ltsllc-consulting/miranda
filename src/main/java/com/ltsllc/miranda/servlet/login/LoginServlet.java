@@ -16,7 +16,7 @@
 
 package com.ltsllc.miranda.servlet.login;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.objects.LoginObject;
 import com.ltsllc.miranda.clientinterface.objects.LoginResultObject;
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeoutException;
  * Created by Clark on 3/31/2017.
  */
 public class LoginServlet extends MirandaServlet {
-    public void doOptions (HttpServletRequest request, HttpServletResponse response) {
+    public void doOptions(HttpServletRequest request, HttpServletResponse response) {
         response.setHeader("Allow", "*");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, Access-Control-Allow-Origin");

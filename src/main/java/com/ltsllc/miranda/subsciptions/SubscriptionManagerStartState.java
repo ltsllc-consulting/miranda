@@ -17,21 +17,22 @@
 package com.ltsllc.miranda.subsciptions;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.manager.ManagerStartState;
 
 /**
  * Created by Clark on 5/14/2017.
  */
-public class SubscriptionManagerStartState extends ManagerStartState{
-    public SubscriptionManager getSubscriptionManager () {
+public class SubscriptionManagerStartState extends ManagerStartState {
+    public SubscriptionManager getSubscriptionManager() {
         return (SubscriptionManager) getContainer();
     }
 
-    public SubscriptionManagerStartState (SubscriptionManager subscriptionManager) {
+    public SubscriptionManagerStartState(SubscriptionManager subscriptionManager) throws MirandaException {
         super(subscriptionManager);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new SubscriptionManagerReadyState(getSubscriptionManager());
     }
 }

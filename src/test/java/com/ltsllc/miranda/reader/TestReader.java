@@ -17,10 +17,12 @@
 package com.ltsllc.miranda.reader;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.Utils;
-import com.ltsllc.miranda.EncryptedMessage;
+import com.ltsllc.clcl.EncryptedMessage;
+import com.ltsllc.clcl.EncryptionException;
+import com.ltsllc.clcl.PrivateKey;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
-import com.ltsllc.miranda.clientinterface.basicclasses.PrivateKey;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.test.TestCase;
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +53,7 @@ public class TestReader extends TestCase {
         return mockPrivateKey;
     }
 
-    public void reset() {
+    public void reset() throws MirandaException {
         super.reset();
 
         mockPrivateKey = null;
@@ -59,7 +61,7 @@ public class TestReader extends TestCase {
     }
 
     @Before
-    public void setup() {
+    public void setup() throws MirandaException {
         reset();
 
         super.setup();
@@ -70,7 +72,7 @@ public class TestReader extends TestCase {
     }
 
     @After
-    public void cleanup () {
+    public void cleanup() {
         System.gc();
         deleteFile(TEST_FILENAME);
     }
@@ -79,7 +81,7 @@ public class TestReader extends TestCase {
     public static final String TEST_FILE_CONTENTS = "whatever";
     public static final String TEST_STRING = "hi there";
 
-    public void createTestFile (String filename) {
+    public void createTestFile(String filename) {
         EncryptedMessage encryptedMessage = new EncryptedMessage();
         encryptedMessage.setMessage(TEST_STRING);
         encryptedMessage.setKey(TEST_STRING);
@@ -90,7 +92,7 @@ public class TestReader extends TestCase {
     }
 
     @Test
-    public void testReadSuccess() throws GeneralSecurityException, IOException {
+    public void testReadSuccess() throws Exception {
         GeneralSecurityException generalSecurityException = null;
         Reader.ReadResult result = null;
 
@@ -113,19 +115,15 @@ public class TestReader extends TestCase {
     }
 
     @Test
-    public void testReadGeneralSecurityException() {
+    public void testReadEncryptionException() throws EncryptionException {
         Exception exception = null;
         Reader.ReadResult result = null;
 
         createTestFile(TEST_FILENAME);
 
-        try {
-            GeneralSecurityException generalSecurityException = new GeneralSecurityException("a test");
-            when(getMockPrivateKey().decrypt(Matchers.any(EncryptedMessage.class))).thenThrow(generalSecurityException);
-            result = getReader().read(TEST_FILENAME);
-        } catch (GeneralSecurityException | IOException e) {
-            exception = e;
-        }
+        EncryptionException encryptionException = new EncryptionException("a test");
+        when(getMockPrivateKey().decrypt(Matchers.any(EncryptedMessage.class))).thenThrow(encryptionException);
+        result = getReader().read(TEST_FILENAME);
 
         assert (result.result == ReadResponseMessage.Results.ExceptionDecryptingFile);
     }

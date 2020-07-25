@@ -16,17 +16,18 @@
 
 package com.ltsllc.miranda.test;
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.network.ConnectionListener;
 import com.ltsllc.miranda.network.Handle;
 import com.ltsllc.miranda.network.NetworkException;
-import com.ltsllc.miranda.network.NetworkListener;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * A class for use in testing {@link NetworkListener}
+ * A class for use in testing {@link ConnectionListener}
  */
-public class TestNetworkListener extends NetworkListener {
+public class TestNetworkListener extends ConnectionListener {
     public enum EventTypes {
         NewHandle,
         Exception,
@@ -40,7 +41,7 @@ public class TestNetworkListener extends NetworkListener {
             return type;
         }
 
-        public Event (EventTypes type) {
+        public Event(EventTypes type) {
             this.type = type;
         }
     }
@@ -52,7 +53,7 @@ public class TestNetworkListener extends NetworkListener {
             return handle;
         }
 
-        public NewHandleEvent (Handle handle) {
+        public NewHandleEvent(Handle handle) {
             super(EventTypes.NewHandle);
 
             this.handle = handle;
@@ -60,7 +61,7 @@ public class TestNetworkListener extends NetworkListener {
     }
 
     public static class StopEvent extends Event {
-        public StopEvent () {
+        public StopEvent() {
             super(EventTypes.Stop);
         }
     }
@@ -72,7 +73,7 @@ public class TestNetworkListener extends NetworkListener {
             return throwable;
         }
 
-        public ExceptionEvent (Throwable throwable) {
+        public ExceptionEvent(Throwable throwable) {
             super(EventTypes.Exception);
 
             this.throwable = throwable;
@@ -96,12 +97,12 @@ public class TestNetworkListener extends NetworkListener {
             return handleQueue;
         }
 
-        public TestConnector (BlockingQueue<Event> eventsQueue, BlockingQueue<Handle> handleQueue) {
+        public TestConnector(BlockingQueue<Event> eventsQueue, BlockingQueue<Handle> handleQueue) {
             this.eventsQueue = eventsQueue;
             this.handleQueue = handleQueue;
         }
 
-        public void run () {
+        public void run() {
             while (keepGoing()) {
                 Event event = null;
 
@@ -152,11 +153,11 @@ public class TestNetworkListener extends NetworkListener {
         startupCalltrace = throwable;
     }
 
-    public boolean startupCalled () {
+    public boolean startupCalled() {
         return null != getStartupCalltrace();
     }
 
-    public TestNetworkListener (int port) {
+    public TestNetworkListener(int port) throws MirandaException {
         super(port);
     }
 
@@ -168,7 +169,7 @@ public class TestNetworkListener extends NetworkListener {
         this.eventsQueue = eventsQueue;
     }
 
-    public void startup (BlockingQueue<Handle> queue) throws NetworkException {
+    public void startup(BlockingQueue<Handle> queue) throws NetworkException {
         LinkedBlockingQueue<Event> eventsQueue = new LinkedBlockingQueue<Event>();
         setEventsQueue(eventsQueue);
 
@@ -187,7 +188,7 @@ public class TestNetworkListener extends NetworkListener {
         }
     }
 
-    public void putEvent (Event event) {
+    public void putEvent(Event event) {
         try {
             getEventsQueue().put(event);
         } catch (InterruptedException e) {
@@ -196,7 +197,7 @@ public class TestNetworkListener extends NetworkListener {
         }
     }
 
-    public void putHandle (Handle handle) {
+    public void putHandle(Handle handle) {
         try {
             getHandleQueue().put(handle);
         } catch (InterruptedException e) {
@@ -205,7 +206,7 @@ public class TestNetworkListener extends NetworkListener {
         }
     }
 
-    public void stopListening () {
+    public void stopListening() {
         // TODO: implement this
     }
 }

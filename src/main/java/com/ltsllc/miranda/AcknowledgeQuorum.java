@@ -1,7 +1,6 @@
 package com.ltsllc.miranda;
 
 import com.ltsllc.miranda.node.Node;
-import com.ltsllc.miranda.Quorum;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ public class AcknowledgeQuorum extends Quorum {
         super(waitingFor);
     }
 
-    public boolean requiresWrites () {
+    public boolean requiresWrites() {
         return false;
     }
 }

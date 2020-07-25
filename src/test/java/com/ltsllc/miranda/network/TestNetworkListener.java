@@ -16,19 +16,20 @@
 
 package com.ltsllc.miranda.network;
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.test.TestCase;
 
 /**
  * Created by Clark on 5/15/2017.
  */
 public class TestNetworkListener extends TestCase {
-    private NetworkListener networkListener;
+    private ConnectionListener networkListener;
 
-    public NetworkListener getNetworkListener() {
+    public ConnectionListener getNetworkListener() {
         return networkListener;
     }
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
 
     }

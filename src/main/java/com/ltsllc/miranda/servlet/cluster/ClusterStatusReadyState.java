@@ -18,28 +18,29 @@ package com.ltsllc.miranda.servlet.cluster;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.servlet.status.GetStatusResponseMessage;
 
 /**
  * Created by Clark on 3/10/2017.
  */
 public class ClusterStatusReadyState extends State {
-    public ClusterStatusReadyState (ClusterStatus clusterStatus) {
+    public ClusterStatusReadyState(ClusterStatus clusterStatus) throws MirandaException {
         super(clusterStatus);
     }
 
-    public ClusterStatus getClusterStatus () {
+    public ClusterStatus getClusterStatus() {
         return (ClusterStatus) getContainer();
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
             case GetStatusResponse: {
                 GetStatusResponseMessage getStatusResponseMessage = (GetStatusResponseMessage) message;
-                nextState = processGetStatusResponseMessage (getStatusResponseMessage);
+                nextState = processGetStatusResponseMessage(getStatusResponseMessage);
                 break;
             }
 
@@ -51,7 +52,7 @@ public class ClusterStatusReadyState extends State {
         return nextState;
     }
 
-    private State processGetStatusResponseMessage (GetStatusResponseMessage getStatusResponseMessage) {
+    private State processGetStatusResponseMessage(GetStatusResponseMessage getStatusResponseMessage) {
         getClusterStatus().receivedClusterStatus(getStatusResponseMessage);
 
         return this;

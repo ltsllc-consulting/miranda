@@ -22,8 +22,8 @@ package com.ltsllc.miranda.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 
 import java.io.File;
@@ -48,7 +48,7 @@ public class EventFileCreator implements FileCreator {
         return random;
     }
 
-    public EventFileCreator (ImprovedRandom random, int maxNumberOfEvents, int maxContentSize) {
+    public EventFileCreator(ImprovedRandom random, int maxNumberOfEvents, int maxContentSize) {
         this.random = random;
         this.maxNumberOfEvents = maxNumberOfEvents;
         this.maxContentSize = maxContentSize;
@@ -59,7 +59,7 @@ public class EventFileCreator implements FileCreator {
         List<Event> list = new ArrayList<Event>();
 
         for (int count = 0; count <= size; count++) {
-            Event event = Event.createRandom (random, maxContentSize);
+            Event event = Event.createRandom(random, maxContentSize);
             list.add(event);
         }
 

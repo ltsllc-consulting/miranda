@@ -16,12 +16,10 @@
 
 package com.ltsllc.miranda.cluster;
 
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.clientinterface.MirandaException;
-import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
-import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
-import com.ltsllc.miranda.clientinterface.basicclasses.Topic;
-import com.ltsllc.miranda.clientinterface.basicclasses.User;
+import com.ltsllc.miranda.clientinterface.basicclasses.*;
 import com.ltsllc.miranda.clientinterface.objects.ClusterStatusObject;
 import com.ltsllc.miranda.clientinterface.objects.NodeStatus;
 import com.ltsllc.miranda.clientinterface.objects.UserObject;
@@ -90,7 +88,7 @@ public class TestCluster extends TestCase {
     };
 
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
 
         this.cluster = null;
@@ -100,7 +98,7 @@ public class TestCluster extends TestCase {
     }
 
     @Before
-    public void setup () {
+    public void setup () throws MirandaException {
         reset();
 
         super.setup();
@@ -149,8 +147,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testContains ()
-    {
+    public void testContains () throws MirandaException {
         NodeElement shouldContain = new NodeElement("foo.com", 6789, "a node");
         Node node = new Node(shouldContain, getMockNetwork(), getMockCluster());
         NodeElement shouldNotContain = new NodeElement("bar.com", 6790, "another node");
@@ -175,7 +172,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testMatchingNode () {
+    public void testMatchingNode () throws MirandaException {
         ArrayList<Node> nodes = new ArrayList<Node>();
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
         Node node = new Node(nodeElement, getMockNetwork(), getCluster());
@@ -188,7 +185,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testGetStatus () {
+    public void testGetStatus () throws MirandaException {
         ArrayList<Node> nodes = new ArrayList<Node>();
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
         Node node = new Node(nodeElement, getMockNetwork(), getCluster());
@@ -212,7 +209,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testMergeNewNode () {
+    public void testMergeNewNode () throws MirandaException {
         List<Node> nodes = new ArrayList<Node>();
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
         Node node = new Node(nodeElement, getMockNetwork(), getCluster());
@@ -235,7 +232,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testMergeNoChange () {
+    public void testMergeNoChange () throws MirandaException {
         List<NodeElement> nodeElements = new ArrayList<NodeElement>();
 
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
@@ -247,7 +244,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testNewNode () {
+    public void testNewNode () throws MirandaException {
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
         Node node = new Node(nodeElement, getMockNetwork(), getCluster());
 
@@ -264,7 +261,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testSendNewNode () {
+    public void testSendNewNode () throws MirandaException {
         getCluster().stop();
 
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
@@ -337,7 +334,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testSendNodeStopped () {
+    public void testSendNodeStopped () throws MirandaException {
         getCluster().stop();
 
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
@@ -375,7 +372,7 @@ public class TestCluster extends TestCase {
     }
 
     @Test
-    public void testAsNodeElements () {
+    public void testAsNodeElements () throws MirandaException {
         List<Node> nodes = new ArrayList<Node>();
         NodeElement nodeElement = new NodeElement("whatever.com", 6789, "whatever");
         List<NodeElement> nodeElementList = new ArrayList<NodeElement>();
@@ -386,7 +383,11 @@ public class TestCluster extends TestCase {
         getCluster().setData(nodes);
 
         List<NodeElement> nodeElements = getCluster().asNodeElements();
-        assert(listsAreEquivalent(nodeElements, nodeElementList));
+
+        //
+        // The call to toEquivalentList makes no sense to me, but it seems to make the compiler happy
+        //
+        assert(listsAreEquivalent(Utils.toEquivalentList(nodeElements), Utils.toEquivalentList(nodeElementList)));
     }
 
     @Test

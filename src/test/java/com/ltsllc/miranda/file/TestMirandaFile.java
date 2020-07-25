@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.file;
 
 import com.ltsllc.miranda.Version;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.event.EventsFile;
 import com.ltsllc.miranda.test.TestCase;
@@ -57,7 +58,7 @@ public class TestMirandaFile extends TestCase {
     }
 
     @Override
-    public void reset() {
+    public void reset() throws MirandaException {
         super.reset();
 
         eventsFile = null;
@@ -83,7 +84,7 @@ public class TestMirandaFile extends TestCase {
 
             eventsFile = new EventsFile("whatever", getMockReader(), getMockWriter());
             eventsFile.setData(eventList);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -121,7 +122,7 @@ public class TestMirandaFile extends TestCase {
 
 
     @Test
-    public void testFileChanged() throws IOException {
+    public void testFileChanged() throws IOException, MirandaException {
         setupMiranda();
         setupMockReader();
         File file = new File(getEventsFile().getFilename());
@@ -135,8 +136,8 @@ public class TestMirandaFile extends TestCase {
     public void testWatch() {
         getEventsFile().watch();
         File file = new File(getEventsFile().getFilename());
-        verify(getMockFileWatcherService(), atLeastOnce()).sendWatchMessage(Matchers.any(BlockingQueue.class),
-                Matchers.any(), Matchers.eq(file));
+        verify(getMockFileWatcherService(), atLeastOnce()).sendWatchFileMessage(Matchers.any(BlockingQueue.class),
+                Matchers.any(), Matchers.eq(file), Matchers.any(BlockingQueue.class));
     }
 
     private void changeEvent(Event event) {
@@ -164,7 +165,7 @@ public class TestMirandaFile extends TestCase {
     }
 
     @Test
-    public void testUpdateVersion() {
+    public void testUpdateVersion() throws MirandaException {
         setupMiranda();
         setupMockReader();
         getEventsFile().load();
@@ -180,7 +181,7 @@ public class TestMirandaFile extends TestCase {
     }
 
     @Test
-    public void testEquals() throws IOException {
+    public void testEquals() throws IOException, MirandaException {
         assert (getEventsFile().equals(getEventsFile()));
 
         EventsFile newEventsFile = new EventsFile("whatever", getMockReader(), getMockWriter());

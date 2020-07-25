@@ -19,6 +19,7 @@ package com.ltsllc.miranda.operations.user;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.StopState;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.user.messages.CreateUserResponseMessage;
@@ -27,15 +28,15 @@ import com.ltsllc.miranda.user.messages.CreateUserResponseMessage;
  * Created by Clark on 4/16/2017.
  */
 public class CreateUserOperationReadyState extends State {
-    public CreateUserOperation getCreateUserOperation () {
+    public CreateUserOperation getCreateUserOperation() {
         return (CreateUserOperation) getContainer();
     }
 
-    public CreateUserOperationReadyState (CreateUserOperation createUserOperation) {
+    public CreateUserOperationReadyState(CreateUserOperation createUserOperation) throws MirandaException {
         super(createUserOperation);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getCreateUserOperation().getCurrentState();
 
         switch (message.getSubject()) {
@@ -54,7 +55,7 @@ public class CreateUserOperationReadyState extends State {
         return nextState;
     }
 
-    public State processCreateUserResponseMessage (CreateUserResponseMessage message) {
+    public State processCreateUserResponseMessage(CreateUserResponseMessage message) {
         if (message.getResult() == Results.Success) {
             Miranda.getInstance().getCluster().sendNewUserMessage(getCreateUserOperation().getQueue(),
                     this, message.getUser());

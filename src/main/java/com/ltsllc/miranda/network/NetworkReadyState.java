@@ -18,6 +18,7 @@ package com.ltsllc.miranda.network;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.network.messages.*;
 import org.apache.log4j.Logger;
@@ -26,25 +27,20 @@ import org.apache.log4j.Logger;
  * Created by Clark on 1/29/2017.
  */
 public class NetworkReadyState extends State {
-    private static Logger logger = Logger.getLogger (NetworkReadyState.class);
+    private static Logger logger = Logger.getLogger(NetworkReadyState.class);
 
-    private Network network;
-
-    public NetworkReadyState(Network network) {
-        super(null);
-        this.network = network;
+    public NetworkReadyState(Network network) throws MirandaException {
+        super(network);
     }
 
     public Network getNetwork() {
-        return network;
+        return (Network) container;
     }
 
-    public State processMessage (Message m)
-    {
+    public State processMessage(Message m) throws MirandaException {
         State nextState = this;
 
-        switch (m.getSubject())
-        {
+        switch (m.getSubject()) {
             case ConnectTo: {
                 ConnectToMessage connectToMessage = (ConnectToMessage) m;
                 nextState = processConnectToMessage(connectToMessage);
@@ -73,10 +69,10 @@ public class NetworkReadyState extends State {
     }
 
 
-    private State processConnectToMessage (ConnectToMessage connectToMessage) {
+    private State processConnectToMessage(ConnectToMessage connectToMessage) throws MirandaException {
         State nextState = this;
 
-        logger.info ("Connecting to " + connectToMessage.getHost() + ":" + connectToMessage.getPort());
+        logger.info("Connecting to " + connectToMessage.getHost() + ":" + connectToMessage.getPort());
 
         getNetwork().connect(connectToMessage);
 
@@ -84,16 +80,17 @@ public class NetworkReadyState extends State {
     }
 
 
-    private State processCloseMessage(CloseMessage closeMessage) {
+    private State processCloseMessage(CloseMessage closeMessage) throws MirandaException {
         getNetwork().disconnect(closeMessage);
 
         CloseResponseMessage reply = new CloseResponseMessage(getNetwork().getQueue(), this, closeMessage.getHandle(),
                 Results.Success);
+        closeMessage.reply(reply);
 
         return this;
     }
 
-    private State processSendNetworkMessage (SendNetworkMessage sendNetworkMessage) {
+    private State processSendNetworkMessage(SendNetworkMessage sendNetworkMessage) throws MirandaException {
         try {
             getNetwork().sendOnNetwork(sendNetworkMessage);
         } catch (NetworkException e) {

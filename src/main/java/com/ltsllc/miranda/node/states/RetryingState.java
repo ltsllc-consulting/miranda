@@ -18,6 +18,7 @@ package com.ltsllc.miranda.node.states;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.network.Network;
 import com.ltsllc.miranda.network.messages.ConnectFailedMessage;
@@ -28,9 +29,9 @@ import org.apache.log4j.Logger;
 
 /**
  * A node that can't connect to a remote system enters this state.
- *
  * <p>
- *     This state assumes that the timer has not already been notified.
+ * <p>
+ * This state assumes that the timer has not already been notified.
  * </p>
  */
 public class RetryingState extends NodeState {
@@ -42,7 +43,7 @@ public class RetryingState extends NodeState {
         return retryCount;
     }
 
-    public void incrementRetries () {
+    public void incrementRetries() {
         this.retryCount++;
     }
 
@@ -50,13 +51,13 @@ public class RetryingState extends NodeState {
         this.retryCount = retryCount;
     }
 
-    public RetryingState (Node node, Network network) {
+    public RetryingState(Node node, Network network) throws MirandaException {
         super(node, network);
     }
 
     public static final long INITIAL_DELAY = 1000; // one second
 
-    public State start () {
+    public State start() {
         retryCount = 0;
 
         RetryMessage retryMessage = new RetryMessage(getNode().getQueue(), this);
@@ -65,7 +66,7 @@ public class RetryingState extends NodeState {
         return this;
     }
 
-    public State processMessage (Message m) {
+    public State processMessage(Message m) throws MirandaException {
         State nextState = this;
 
         switch (m.getSubject()) {
@@ -96,7 +97,7 @@ public class RetryingState extends NodeState {
         return nextState;
     }
 
-    private State processRetryMessage (RetryMessage retryMessage) {
+    private State processRetryMessage(RetryMessage retryMessage) {
         getNetwork().sendConnect(getNode().getQueue(), this, getNode().getDns(), getNode().getPort());
 
         return this;
@@ -105,7 +106,7 @@ public class RetryingState extends NodeState {
     public static final long MAX_TIME = 60000; // one minute
     public static final int MAX_RETRY_COUNT = 10;
 
-    private State processConnectFailedMessage (ConnectFailedMessage connectFailedMessage) {
+    private State processConnectFailedMessage(ConnectFailedMessage connectFailedMessage) {
         incrementRetries();
         int retryCount = getRetryCount() - 1;
         if (retryCount > MAX_RETRY_COUNT)
@@ -119,14 +120,14 @@ public class RetryingState extends NodeState {
         Miranda.timer.sendScheduleOnce(delay, getNode().getQueue(), retryMessage);
 
         String message = "Failed to connect to " + getNode().getDns() + ":" + getNode().getPort() + ".  Will "
-            + "try agian in " + delay + "msec.";
+                + "try agian in " + delay + "msec.";
         logger.info(message);
 
         return this;
     }
 
 
-    private State processConnectSuceeededMessage (ConnectSucceededMessage connectSucceededMessage) {
+    private State processConnectSuceeededMessage(ConnectSucceededMessage connectSucceededMessage) throws MirandaException {
         getNode().setHandle(connectSucceededMessage.getHandle());
 
         JoiningState joiningState = new JoiningState(getNode(), getNetwork());

@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.deliveries;
 
+import com.ltsllc.commons.util.ImprovedRandom;
 import com.ltsllc.miranda.clientinterface.basicclasses.Delivery;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
@@ -46,7 +47,7 @@ public class TestDelivery extends TestCase {
             Subscription subscription = new Subscription();
 
             this.delivery = new Delivery(event, System.currentTimeMillis(), subscription);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -61,7 +62,7 @@ public class TestDelivery extends TestCase {
 
             this.delivery = new Delivery(event, timeDelivered, subscription);
 
-            assert (getDelivery().getGuid().equals(event.getGuid()));
+            assert (getDelivery().getEventGuid().equals(event.getGuid()));
             assert (getDelivery().getDelivered() == timeDelivered);
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,27 +70,32 @@ public class TestDelivery extends TestCase {
     }
 
     @Test
-    public void testUpdateFrom () {
-        Delivery delivery = Delivery.createRandomDelivery();
-        Delivery update = Delivery.createRandomDelivery();
+    public void testMerge () throws IOException {
+        ImprovedRandom improvedRandom = new ImprovedRandom();
+
+        Delivery delivery = Delivery.createRandomDelivery(improvedRandom);
+        Delivery update = Delivery.createRandomDelivery(improvedRandom);
+
         IllegalStateException illegalStateException = null;
 
         try {
-            delivery.updateFrom(update);
+            delivery.merge(update);
         } catch (IllegalStateException e) {
             illegalStateException = e;
         }
 
-        assert (null != illegalStateException);
+        assert (null == illegalStateException);
     }
 
     @Test
-    public void testMatch () {
-        Delivery delivery = Delivery.createRandomDelivery();
-        Delivery other = Delivery.createRandomDelivery();
+    public void testEquals () {
+        ImprovedRandom improvedRandom = new ImprovedRandom();
 
-        assert (delivery.matches(delivery));
-        assert (!delivery.matches(other));
+        Delivery delivery = Delivery.createRandomDelivery(improvedRandom);
+        Delivery other = Delivery.createRandomDelivery(improvedRandom);
+
+        assert (delivery.equals(delivery));
+        assert (!delivery.equals(other));
     }
 }
 

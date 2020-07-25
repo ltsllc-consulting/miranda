@@ -23,6 +23,7 @@ package com.ltsllc.miranda.file;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ltsllc.miranda.Version;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.states.DirectoryReadyState;
 import com.ltsllc.miranda.reader.Reader;
 import com.ltsllc.miranda.writer.Writer;
@@ -37,12 +38,13 @@ import java.util.List;
  * A directory containing file the system should keep an eye one
  */
 abstract public class Directory extends MirandaFile {
-    abstract public boolean isFileOfInterest (String filename);
-    abstract public MirandaFile createMirandaFile (String filename);
+    abstract public boolean isFileOfInterest(String filename);
+
+    abstract public MirandaFile createMirandaFile(String filename);
 
     private List<MirandaFile> files = new ArrayList<MirandaFile>();
 
-    public Directory (String filename, Reader reader, Writer writer) throws IOException {
+    public Directory(String filename, Reader reader, Writer writer) throws IOException, MirandaException {
         super(filename, reader, writer);
 
         DirectoryReadyState readyState = new DirectoryReadyState(this);
@@ -57,19 +59,19 @@ abstract public class Directory extends MirandaFile {
         this.files = files;
     }
 
-    public List<String> traverse () {
+    public List<String> traverse() {
         List<String> mathces = new ArrayList<String>();
         traverse(getFilename(), mathces);
         return mathces;
     }
 
-    public List<String> traverse (String root) {
+    public List<String> traverse(String root) {
         List<String> matches = new ArrayList<String>();
         traverse(root, matches);
         return matches;
     }
 
-    public void traverse (String directory, List<String> matches) {
+    public void traverse(String directory, List<String> matches) {
         File f = new File(directory);
         String[] contents = f.list();
         if (null == contents)
@@ -107,7 +109,7 @@ abstract public class Directory extends MirandaFile {
         return new byte[0];
     }
 
-    public void updateVersion () throws NoSuchAlgorithmException {
+    public void updateVersion() throws NoSuchAlgorithmException {
         List<Version> list = new ArrayList<Version>();
 
         for (MirandaFile file : getFiles()) {
@@ -126,8 +128,7 @@ abstract public class Directory extends MirandaFile {
     }
 
     public void write() {
-        for (MirandaFile file : getFiles())
-        {
+        for (MirandaFile file : getFiles()) {
             file.write();
         }
     }

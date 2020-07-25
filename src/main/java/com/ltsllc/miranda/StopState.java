@@ -17,27 +17,31 @@
 package com.ltsllc.miranda;
 
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
+
 /**
  * A stop state for a Miranda Subsystem.
- *
+ * <p>
  * This class represents that the owner has reached a point where it
  * should be shut down.
- *
+ * <p>
  * Created by Clark on 12/31/2016.
  */
 public class StopState extends State {
-    private static StopState ourInstance = new StopState();
+    public static void initializeClass() throws MirandaException {
+        ourInstance = new StopState();
+    }
 
-    public static StopState getInstance () {
+    private static StopState ourInstance;
+
+    public static StopState getInstance() {
         return ourInstance;
     }
 
-    public StopState()
-    {
-        super(null);
+    public StopState() throws MirandaException {
     }
 
-    public State processMessage () {
+    public State processMessage() {
         throw new IllegalStateException();
     }
 }

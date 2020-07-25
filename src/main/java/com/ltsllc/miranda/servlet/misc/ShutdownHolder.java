@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.servlet.misc;
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.servlet.ServletHolder;
 
@@ -27,19 +28,19 @@ import java.util.concurrent.TimeoutException;
 public class ShutdownHolder extends ServletHolder {
     private static ShutdownHolder ourInstance;
 
-    public static synchronized void initialize (long timeout) {
+    public static synchronized void initialize(long timeout) throws MirandaException {
         ourInstance = new ShutdownHolder(timeout);
     }
 
-    public static ShutdownHolder getInstance () {
+    public static ShutdownHolder getInstance() {
         return ourInstance;
     }
 
-    public ShutdownHolder (long timeout) {
+    public ShutdownHolder(long timeout) throws MirandaException {
         super("shutdown holder", timeout);
     }
 
-    public void shutdownMirada () throws TimeoutException {
+    public void shutdownMirada() throws TimeoutException {
         Miranda.getInstance().sendShutdown(getQueue(), this);
 
         sleep();

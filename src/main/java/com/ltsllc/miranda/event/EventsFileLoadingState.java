@@ -17,21 +17,22 @@
 package com.ltsllc.miranda.event;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.states.SingleFileLoadingState;
 
 /**
  * Created by Clark on 5/14/2017.
  */
 public class EventsFileLoadingState extends SingleFileLoadingState {
-    public EventsFile getEventsFile () {
+    public EventsFile getEventsFile() {
         return (EventsFile) getContainer();
     }
 
-    public EventsFileLoadingState (EventsFile eventsFile) {
+    public EventsFileLoadingState(EventsFile eventsFile) throws MirandaException {
         super(eventsFile);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new EventsFileReadyState(getEventsFile());
     }
 }

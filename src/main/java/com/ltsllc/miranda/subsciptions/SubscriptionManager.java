@@ -18,6 +18,7 @@ package com.ltsllc.miranda.subsciptions;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.file.SingleFile;
@@ -48,38 +49,38 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         setData(subscriptions);
     }
 
-    public SubscriptionManager(String filename) throws IOException {
+    public SubscriptionManager(String filename) throws IOException, MirandaException {
         super("subscription manager", filename);
 
         SubscriptionManagerStartState subscriptionManagerStartState = new SubscriptionManagerStartState(this);
         setCurrentState(subscriptionManagerStartState);
     }
 
-    public SingleFile createFile(String filename) throws IOException {
+    public SingleFile createFile(String filename) throws IOException, MirandaException {
         return new SubscriptionsFile(Miranda.getInstance().getReader(), Miranda.getInstance().getWriter(), filename);
     }
 
-    public State createStartState () {
+    public State createStartState() throws MirandaException {
         return new SubscriptionManagerStartState(this);
     }
 
-    public void sendOwnerQueryMessage (BlockingQueue<Message> senderQueue, Object sender, String name) {
+    public void sendOwnerQueryMessage(BlockingQueue<Message> senderQueue, Object sender, String name) {
         OwnerQueryMessage ownerQueryMessage = new OwnerQueryMessage(senderQueue, sender, name);
         sendToMe(ownerQueryMessage);
     }
 
-    public void sendGetSubscriptionsMessage (BlockingQueue<Message> senderQueue, Object sender) {
+    public void sendGetSubscriptionsMessage(BlockingQueue<Message> senderQueue, Object sender) {
         LIstSubscriptionsMessage getSubscriptionsMessage = new LIstSubscriptionsMessage(senderQueue, sender);
         sendToMe(getSubscriptionsMessage);
     }
 
-    public void sendGetSubscriptionMessage (BlockingQueue<Message> senderQueue, Object sender, String name) {
+    public void sendGetSubscriptionMessage(BlockingQueue<Message> senderQueue, Object sender, String name) {
         GetSubscriptionMessage getSubscriptionMessage = new GetSubscriptionMessage(senderQueue, sender, name);
         sendToMe(getSubscriptionMessage);
     }
 
-    public void sendCreateSubscriptionMessage (BlockingQueue<Message> senderQueue, Object sender,
-                                               Session session, Subscription subscription) {
+    public void sendCreateSubscriptionMessage(BlockingQueue<Message> senderQueue, Object sender,
+                                              Session session, Subscription subscription) {
 
         CreateSubscriptionMessage createSubscriptionMessage = new CreateSubscriptionMessage(senderQueue, sender,
                 session, subscription);
@@ -87,16 +88,16 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         sendToMe(createSubscriptionMessage);
     }
 
-    public void sendUpdateSubscriptionMessage (BlockingQueue<Message> senderQueue, Object sender, Session session,
-                                               Subscription subscription) {
+    public void sendUpdateSubscriptionMessage(BlockingQueue<Message> senderQueue, Object sender, Session session,
+                                              Subscription subscription) {
         UpdateSubscriptionMessage updateSubscriptionMessage = new UpdateSubscriptionMessage(senderQueue, sender,
                 session, subscription);
 
         sendToMe(updateSubscriptionMessage);
     }
 
-    public void sendDeleteSubscriptionMessage (BlockingQueue<Message> senderQueue, Object sender, Session session,
-                                               String name) {
+    public void sendDeleteSubscriptionMessage(BlockingQueue<Message> senderQueue, Object sender, Session session,
+                                              String name) {
 
         DeleteSubscriptionMessage deleteSubscriptionMessage = new DeleteSubscriptionMessage(senderQueue, sender,
                 session, name);
@@ -104,8 +105,8 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         sendToMe(deleteSubscriptionMessage);
     }
 
-    public Results createSubscription (Subscription subscription) {
-        Subscription existing = findSubscription (subscription.getName());
+    public Results createSubscription(Subscription subscription) {
+        Subscription existing = findSubscription(subscription.getName());
         if (null != existing) {
             return Results.Duplicate;
         }
@@ -125,7 +126,7 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         return null;
     }
 
-    public Results updateSubscription (Subscription subscription) {
+    public Results updateSubscription(Subscription subscription) {
         Subscription existing = findSubscription(subscription.getName());
         Results result;
 
@@ -139,7 +140,7 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         return result;
     }
 
-    public Results deleteSubscription (String name) {
+    public Results deleteSubscription(String name) {
         Subscription subscription = findSubscription(name);
 
         Results result;
@@ -154,7 +155,7 @@ public class SubscriptionManager extends StandardManager<Subscription> {
         return result;
     }
 
-    public Subscription convert (Subscription subscription) {
+    public Subscription convert(Subscription subscription) {
         return subscription;
     }
 }

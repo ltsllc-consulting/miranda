@@ -20,6 +20,7 @@ import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.StartupPanic;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.StopState;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.cluster.messages.LoadMessage;
 import com.ltsllc.miranda.file.SingleFile;
 import com.ltsllc.miranda.miranda.Miranda;
@@ -30,29 +31,29 @@ import com.ltsllc.miranda.reader.ReadResponseMessage;
  * A state for when the object is first created.  It waits for the read to complete
  */
 abstract public class SingleFileStartingState extends State {
-    abstract public State getReadyState();
+    abstract public State getReadyState() throws MirandaException;
 
-    public SingleFile getFile () {
+    public SingleFile getFile() {
         return (SingleFile) getContainer();
     }
 
-    public SingleFileStartingState (SingleFile singleFile) {
+    public SingleFileStartingState(SingleFile singleFile) throws MirandaException {
         super(singleFile);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getFile().getCurrentState();
 
         switch (message.getSubject()) {
             case Load: {
                 LoadMessage loadMessage = (LoadMessage) message;
-                nextState = processLoadMessage (loadMessage);
+                nextState = processLoadMessage(loadMessage);
                 break;
             }
 
             case ReadResponse: {
                 ReadResponseMessage readResponseMessage = (ReadResponseMessage) message;
-                nextState = processReadResponseMessage (readResponseMessage);
+                nextState = processReadResponseMessage(readResponseMessage);
                 break;
             }
 
@@ -71,7 +72,7 @@ abstract public class SingleFileStartingState extends State {
         return nextState;
     }
 
-    public State processReadResponseMessage(ReadResponseMessage readResponseMessage) {
+    public State processReadResponseMessage(ReadResponseMessage readResponseMessage) throws MirandaException {
         if (readResponseMessage.getResult() == ReadResponseMessage.Results.Success) {
             getFile().setData(readResponseMessage.getData());
             getFile().fireFileLoaded();
@@ -105,13 +106,13 @@ abstract public class SingleFileStartingState extends State {
         }
     }
 
-    public State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    public State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         defer(garbageCollectionMessage);
 
         return getFile().getCurrentState();
     }
 
-    private State processLoadMessage (LoadMessage loadMessage) {
+    private State processLoadMessage(LoadMessage loadMessage) {
         getFile().load();
 
         return this;

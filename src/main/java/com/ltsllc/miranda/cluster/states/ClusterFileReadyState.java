@@ -21,6 +21,7 @@ import com.ltsllc.miranda.LoadResponseMessage;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.Version;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 import com.ltsllc.miranda.cluster.ClusterFile;
 import com.ltsllc.miranda.cluster.messages.*;
@@ -43,7 +44,7 @@ import java.util.List;
 public class ClusterFileReadyState extends SingleFileReadyState {
     private static Logger logger = Logger.getLogger(ClusterFileReadyState.class);
 
-    public ClusterFileReadyState(ClusterFile clusterFile) {
+    public ClusterFileReadyState(ClusterFile clusterFile) throws MirandaException {
         super(clusterFile);
     }
 
@@ -56,7 +57,7 @@ public class ClusterFileReadyState extends SingleFileReadyState {
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
@@ -104,28 +105,13 @@ public class ClusterFileReadyState extends SingleFileReadyState {
     }
 
 
-    private State processGetClusterFileMessage (GetClusterFileMessage getClusterFileMessage) {
+    private State processGetClusterFileMessage(GetClusterFileMessage getClusterFileMessage) throws MirandaException {
         List<NodeElement> newList = new ArrayList<NodeElement>(getClusterFile().getData());
 
-        ClusterFileMessage clusterFileMessage = new ClusterFileMessage (getClusterFile().getQueue(), this,
+        ClusterFileMessage clusterFileMessage = new ClusterFileMessage(getClusterFile().getQueue(), this,
                 newList, getClusterFile().getVersion());
 
         getClusterFileMessage.reply(clusterFileMessage);
-
-        return this;
-    }
-
-    /**
-     * This is called when there is a new version of the cluster file.  If
-     * something changed, then we need to tell the cluster about it.
-     *
-     * @param newClusterFileMessage
-     * @return
-     */
-    private State processNewClusterFileMessage (NewClusterFileMessage newClusterFileMessage) {
-        if (!getClusterFile().getVersion().equals(newClusterFileMessage.getVersion())) {
-            getClusterFile().merge(newClusterFileMessage.getFile());
-        }
 
         return this;
     }
@@ -140,7 +126,7 @@ public class ClusterFileReadyState extends SingleFileReadyState {
      * @param healthCheckUpdateMessage
      * @return
      */
-    private State processHealthCheckUpdateMessage (HealthCheckUpdateMessage healthCheckUpdateMessage) {
+    private State processHealthCheckUpdateMessage(HealthCheckUpdateMessage healthCheckUpdateMessage) {
         //
         // update the time of last connect for nodes in the message
         //
@@ -195,13 +181,14 @@ public class ClusterFileReadyState extends SingleFileReadyState {
 
     @Override
     public Type getListType() {
-        return new TypeToken<List<NodeElement>>(){}.getType();
+        return new TypeToken<List<NodeElement>>() {
+        }.getType();
     }
 
 
-    public void write () {
+    public void write() {
         WriteMessage writeMessage = new WriteMessage(getClusterFile().getFilename(), getClusterFile().getBytes(), getClusterFile().getQueue(), this);
-        send (getClusterFile().getWriterQueue(), writeMessage);
+        send(getClusterFile().getWriterQueue(), writeMessage);
     }
 
 
@@ -242,13 +229,13 @@ public class ClusterFileReadyState extends SingleFileReadyState {
         return "ReadyState";
     }
 
-    private State processWriteFailedMessage (WriteFailedMessage message) {
+    private State processWriteFailedMessage(WriteFailedMessage message) {
         logger.error("Failed to write cluster file: " + message.getFilename(), message.getCause());
 
         return this;
     }
 
-    public State start () {
+    public State start() {
         State nextState = super.start();
 
         MirandaProperties properties = Miranda.properties;
@@ -260,7 +247,7 @@ public class ClusterFileReadyState extends SingleFileReadyState {
         return nextState;
     }
 
-    private State processLoadMessage (LoadMessage loadMessage) {
+    private State processLoadMessage(LoadMessage loadMessage) throws MirandaException {
         getClusterFile().load();
 
         LoadResponseMessage loadResponseMessage = new LoadResponseMessage(getClusterFile().getCluster(), this, getClusterFile().getData());
@@ -269,11 +256,12 @@ public class ClusterFileReadyState extends SingleFileReadyState {
         return this;
     }
 
-    private State processNodesUpdatedMessage (NodesUpdatedMessage nodesUpdatedMessage) {
+    private State processNodesUpdatedMessage(NodesUpdatedMessage nodesUpdatedMessage) {
         List<NodeElement> copy = new ArrayList<NodeElement>(nodesUpdatedMessage.getNodeList());
         getClusterFile().setData(copy);
         getClusterFile().write();
 
         return this;
     }
+
 }

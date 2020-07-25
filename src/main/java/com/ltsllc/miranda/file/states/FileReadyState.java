@@ -17,17 +17,12 @@
 package com.ltsllc.miranda.file.states;
 
 import com.ltsllc.miranda.Message;
-import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.MirandaFile;
 import com.ltsllc.miranda.file.messages.FileChangedMessage;
-import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.miranda.messages.GarbageCollectionMessage;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Clark on 2/19/2017.
@@ -38,7 +33,7 @@ public class FileReadyState extends State {
     private MirandaFile file;
 
 
-    public FileReadyState (MirandaFile file) {
+    public FileReadyState(MirandaFile file) throws MirandaException {
         super(file);
 
         this.file = file;
@@ -50,7 +45,7 @@ public class FileReadyState extends State {
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
@@ -66,7 +61,7 @@ public class FileReadyState extends State {
                 break;
             }
 
-            default :
+            default:
                 nextState = super.processMessage(message);
                 break;
         }
@@ -74,18 +69,13 @@ public class FileReadyState extends State {
     }
 
 
-    private State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    private State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         return getFile().getCurrentState();
     }
 
 
-    public State processFileChangedMessage (FileChangedMessage fileChangedMessage) {
-        try {
-            getFile().load();
-        } catch (IOException e) {
-            Panic panic = new Panic("Exception loading file", e, Panic.Reasons.ErrorLoadingFile);
-            Miranda.panicMiranda(panic);
-        }
+    public State processFileChangedMessage(FileChangedMessage fileChangedMessage) {
+        getFile().load();
 
         return getFile().getCurrentState();
     }

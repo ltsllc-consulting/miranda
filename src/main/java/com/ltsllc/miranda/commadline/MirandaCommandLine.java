@@ -16,7 +16,7 @@
 
 package com.ltsllc.miranda.commadline;
 
-import com.ltsllc.common.commadline.CommandLine;
+import com.ltsllc.commons.commadline.CommandLine;
 import com.ltsllc.miranda.property.MirandaProperties;
 import org.apache.log4j.Logger;
 
@@ -32,17 +32,16 @@ import java.util.Properties;
  */
 public class MirandaCommandLine extends CommandLine {
     public enum Options {
-        Unknown(1 + Switches.LAST.getIndex()),
-
+        Unknown(1 + CommandLine.Switches.LAST.getIndex()),
         Debug(2 + Switches.LAST.getIndex()),
         LoggingLevel(3 + Switches.LAST.getIndex()),
         Log4j(4 + Switches.LAST.getIndex()),
         Mode(5 + Switches.LAST.getIndex()),
-        Password(6 + Switches.LAST.getIndex()),
-        Properties(7 + Switches.LAST.getIndex()),
-        Keystore(8 + Switches.LAST.getIndex()),
+        KeyStoreFile(6 + Switches.LAST.getIndex()),
+        KeyStorePassword(7 + Switches.LAST.getIndex()),
+        Properties(8 + Switches.LAST.getIndex()),
         TrustoreFile(9 + Switches.LAST.getIndex()),
-        TrustorePassword(9 + Switches.LAST.getIndex());
+        TrustorePassword(10 + Switches.LAST.getIndex());
 
         private int index;
 
@@ -65,8 +64,10 @@ public class MirandaCommandLine extends CommandLine {
                 option = Log4j;
             else if (aSwitch.getIndex() == Mode.getIndex())
                 option = Mode;
-            else if (aSwitch.getIndex() == Password.getIndex())
-                option = Password;
+            else if (aSwitch.getIndex() == KeyStoreFile.getIndex())
+                option = KeyStoreFile;
+            else if (aSwitch.getIndex() == KeyStorePassword.getIndex())
+                option = KeyStorePassword;
             else if (aSwitch.getIndex() == Properties.getIndex())
                 option = Properties;
             else if (aSwitch.getIndex() == TrustoreFile.getIndex())
@@ -86,6 +87,9 @@ public class MirandaCommandLine extends CommandLine {
 
     public static final String OPTION_MODE_SHORT = "-m";
     public static final String OPTION_MODE_LONG = "--mode";
+
+    public static final String OPTION_KEYSTORE_FILE_SHORT = "-k";
+    public static final String OPTION_KEYSTORE_FILE_LONG = "--keyStoreFile";
 
     public static final String OPTION_KEYSTORE_PASSWORD_SHORT = "-p";
     public static final String OPTION_KEYSTORE_PASSWORD_LONG = "--keyStorePassword";
@@ -110,9 +114,11 @@ public class MirandaCommandLine extends CommandLine {
     private String log4jFilename;
     private String propertiesFilename;
     private String mirandaMode;
-    private String password;
     private boolean error;
+    private String truststoreFilename;
     private String trustorePassword;
+    private String keystoreFilename;
+    private String keystorePassword;
 
     public String getUsageString() {
         return USAGE;
@@ -134,16 +140,32 @@ public class MirandaCommandLine extends CommandLine {
         this.error = error;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getLoggingLevel() {
         return loggingLevel;
+    }
+
+    public String getTruststoreFilename() {
+        return truststoreFilename;
+    }
+
+    public void setTruststoreFilename(String truststoreFilename) {
+        this.truststoreFilename = truststoreFilename;
+    }
+
+    public String getKeystoreFilename() {
+        return keystoreFilename;
+    }
+
+    public void setKeystoreFilename(String keystoreFilename) {
+        this.keystoreFilename = keystoreFilename;
+    }
+
+    public String getKeystorePassword() {
+        return keystorePassword;
+    }
+
+    public void setKeystorePassword(String keystorePassword) {
+        this.keystorePassword = keystorePassword;
     }
 
     public Switches toSwitch(String argument) {
@@ -153,12 +175,14 @@ public class MirandaCommandLine extends CommandLine {
             aSwitch.setIndex(Options.Unknown.getIndex());
         else if (argument.equals(OPTION_DEBUGGING_MODE_SHORT) || argument.equals(OPTION_DEBUGGING_MODE_LONG))
             aSwitch.setIndex(Options.Debug.getIndex());
-        else if (argument.equals(OPTION_LOGGING_LEVEL_SHORT) || argument.equals(OPTION_LOGGING_LEVEL_LONG)) {
+        else if (argument.equals(OPTION_LOGGING_LEVEL_SHORT) || argument.equals(OPTION_LOGGING_LEVEL_LONG))
             aSwitch.setIndex(Options.LoggingLevel.getIndex());
-        } else if (argument.equals(OPTION_MODE_SHORT) || argument.equals(OPTION_MODE_LONG))
+        else if (argument.equals(OPTION_MODE_SHORT) || argument.equals(OPTION_MODE_LONG))
             aSwitch.setIndex(Options.Mode.getIndex());
+        else if (argument.equals(OPTION_KEYSTORE_FILE_SHORT) || argument.equals(OPTION_KEYSTORE_FILE_LONG))
+            aSwitch.setIndex(Options.KeyStoreFile.getIndex());
         else if (argument.equals(OPTION_KEYSTORE_PASSWORD_SHORT) || argument.equals(OPTION_KEYSTORE_PASSWORD_LONG))
-            aSwitch.setIndex(Options.Keystore.getIndex());
+            aSwitch.setIndex(Options.KeyStorePassword.getIndex());
         else if (argument.equals(OPTION_PROPERTIES_SHORT) || argument.equals(OPTION_PROPERTIES_LONG))
             aSwitch.setIndex(Options.TrustorePassword.getIndex());
         else if (argument.equals(OPTION_LOG4J_SHORT) || argument.equals(OPTION_LOG4J_LONG))
@@ -232,7 +256,7 @@ public class MirandaCommandLine extends CommandLine {
         return properties;
     }
 
-    public void processSwitch (Switches aSwitch) {
+    public void processSwitch(Switches aSwitch) {
         Options option = Options.toOption(aSwitch);
 
         switch (option) {
@@ -256,13 +280,23 @@ public class MirandaCommandLine extends CommandLine {
                 break;
             }
 
-            case Password: {
-                processPassword();
+            case KeyStoreFile: {
+                processKeystoreFile();
+                break;
+            }
+
+            case KeyStorePassword: {
+                processKeystorePassword();
                 break;
             }
 
             case Properties: {
                 processProperties();
+                break;
+            }
+
+            case TrustoreFile: {
+                processTrustoreFile();
                 break;
             }
 
@@ -277,6 +311,18 @@ public class MirandaCommandLine extends CommandLine {
                 break;
             }
         }
+    }
+
+    private void processTrustoreFile() {
+        setTruststoreFilename(getArgAndAdvanceOrError("Missing truststore filename"));
+    }
+
+    private void processKeystorePassword() {
+        setKeystorePassword(getArgAndAdvanceOrError("Missing keystore password"));
+    }
+
+    private void processKeystoreFile() {
+        setKeystoreFilename(getArgAndAdvanceOrError("Missing keystore filename"));
     }
 
     public void error(String message) {
@@ -337,13 +383,6 @@ public class MirandaCommandLine extends CommandLine {
 
     }
 
-    public void processPassword() {
-        if (hasMoreArgs())
-            setPassword(getArgAndAdvance());
-        else
-            error("Missing password argument");
-    }
-
     public void processProperties() {
         if (hasMoreArgs())
             setPropertiesFilename(getArgAndAdvance());
@@ -352,9 +391,6 @@ public class MirandaCommandLine extends CommandLine {
     }
 
     public void processTrustorePassword() {
-        if (hasMoreArgs())
-            setTrustorePassword(getArgAndAdvance());
-        else
-            error("Missing trustore password argument");
+        setTrustorePassword(getArgAndAdvanceOrError("Missing truststore password"));
     }
 }

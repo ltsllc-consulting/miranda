@@ -18,6 +18,7 @@ package com.ltsllc.miranda.manager;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.messages.FileDoesNotExistMessage;
 import com.ltsllc.miranda.file.messages.FileLoadedMessage;
 import com.ltsllc.miranda.miranda.messages.GarbageCollectionMessage;
@@ -28,23 +29,23 @@ import java.util.List;
  * Created by Clark on 5/14/2017.
  */
 abstract public class ManagerLoadingState extends State {
-    abstract public State getReadyState();
+    abstract public State getReadyState() throws MirandaException;
 
-    public Manager getManager () {
+    public Manager getManager() {
         return (Manager) getContainer();
     }
 
-    public ManagerLoadingState (Manager manager) {
+    public ManagerLoadingState(Manager manager) throws MirandaException {
         super(manager);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getManager().getCurrentState();
 
         switch (message.getSubject()) {
             case FileLoaded: {
                 FileLoadedMessage fileLoadedMessage = (FileLoadedMessage) message;
-                nextState = processFileLoadedMessage (fileLoadedMessage);
+                nextState = processFileLoadedMessage(fileLoadedMessage);
                 break;
             }
 
@@ -56,7 +57,7 @@ abstract public class ManagerLoadingState extends State {
 
             case GarbageCollection: {
                 GarbageCollectionMessage garbageCollectionMessage = (GarbageCollectionMessage) message;
-                nextState = processGarbageCollectionMessage (garbageCollectionMessage);
+                nextState = processGarbageCollectionMessage(garbageCollectionMessage);
                 break;
             }
 
@@ -69,20 +70,20 @@ abstract public class ManagerLoadingState extends State {
         return nextState;
     }
 
-    public State processFileLoadedMessage (FileLoadedMessage fileLoadedMessage) {
+    public State processFileLoadedMessage(FileLoadedMessage fileLoadedMessage) throws MirandaException {
         List list = (List) fileLoadedMessage.getData();
         getManager().setData(list);
 
         return getReadyState();
     }
 
-    public State processFileDoesNotExistMessage (FileDoesNotExistMessage fileDoesNotExistMessage) {
+    public State processFileDoesNotExistMessage(FileDoesNotExistMessage fileDoesNotExistMessage) throws MirandaException {
         getManager().getData().clear();
 
         return getReadyState();
     }
 
-    public State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    public State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         defer(garbageCollectionMessage);
 
         return getManager().getCurrentState();

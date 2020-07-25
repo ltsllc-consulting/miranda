@@ -16,8 +16,9 @@
 
 package com.ltsllc.miranda.user;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.objects.StatusObject;
 import com.ltsllc.miranda.file.Subscriber;
@@ -58,7 +59,7 @@ public class TestUserManager extends TestCase {
         return userManager;
     }
 
-    public void reset() {
+    public void reset() throws MirandaException {
         super.reset();
 
         userManager = null;
@@ -77,7 +78,7 @@ public class TestUserManager extends TestCase {
     };
 
     @Before
-    public void setup() {
+    public void setup() throws MirandaException {
         reset();
 
         super.setup();
@@ -154,23 +155,11 @@ public class TestUserManager extends TestCase {
             "]"
     };
 
-    @Test
-    public void testPerformGarbageCollection() {
-        User user = new User("whatever", "whatever");
-        getUserManager().getData().add(user);
-
-        assert (getUserManager().getUsers().size() > 0);
-
-        getUserManager().performGarbageCollection();
-
-        assert (getUserManager().getUsers().size() < 1);
-    }
 
     @Test
-    public void testContains() {
-        User user = new User("whatever", "whatever");
-        getUserManager().getData().add(user);
+    public void testContains() throws Exception {
         User shouldContain = new User("whatever", "whatever");
+        getUserManager().addUser(shouldContain);
         User shouldNotContain = new User("not here", "absent");
 
         assert (getUserManager().contains(shouldContain));

@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.servlet.user;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.objects.ReadObject;
 import com.ltsllc.miranda.clientinterface.requests.UserRequest;
@@ -31,18 +32,23 @@ import java.util.concurrent.TimeoutException;
  * Created by Clark on 4/10/2017.
  */
 public class ReadUserServlet extends UserServlet {
-    public ResultObject createResultObject () {
+    public ResultObject createResultObject() {
         return new ResultObject();
     }
 
     public ReadObject basicService(HttpServletRequest request, HttpServletResponse response,
-                                   UserRequest requestObject) throws ServletException, IOException, TimeoutException
+                                   UserRequest requestObject)
+            throws ServletException, IOException, TimeoutException
     {
-        UserHolder.getInstance().getUser(requestObject.getUser().getName());
-        ReadObject<User> readObject = new ReadObject<User>();
-        readObject.setResult(UserHolder.getInstance().getGetUserResults());
-        readObject.setObject(UserHolder.getInstance().getUser());
+        try {
+            UserHolder.getInstance().getUser(requestObject.getUser().getName());
+            ReadObject<User> readObject = new ReadObject<User>();
+            readObject.setResult(UserHolder.getInstance().getGetUserResults());
+            readObject.setObject(UserHolder.getInstance().getUser());
 
-        return readObject;
+            return readObject;
+        } catch (EncryptionException encryptionException) {
+            throw new ServletException(encryptionException);
+        }
     }
 }

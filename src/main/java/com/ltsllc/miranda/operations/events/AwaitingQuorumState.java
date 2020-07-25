@@ -1,10 +1,10 @@
 package com.ltsllc.miranda.operations.events;
 
 import com.ltsllc.miranda.*;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.operations.NetworkConversationMessage;
 import com.ltsllc.miranda.operations.Operation;
-import com.ltsllc.miranda.Quorum;
 import com.ltsllc.miranda.operations.WireResponse;
 import org.apache.log4j.Logger;
 
@@ -18,7 +18,7 @@ abstract public class AwaitingQuorumState extends OperationState {
 
     private Quorum quorum;
 
-    public AwaitingQuorumState(Operation operation, Quorum quorum) {
+    public AwaitingQuorumState(Operation operation, Quorum quorum) throws MirandaException {
         super(operation);
 
         this.quorum = quorum;
@@ -28,11 +28,11 @@ abstract public class AwaitingQuorumState extends OperationState {
         return quorum;
     }
 
-    public Operation getOperation () {
+    public Operation getOperation() {
         return (Operation) getContainer();
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getOperation().getCurrentState();
 
         switch (message.getSubject()) {
@@ -51,11 +51,11 @@ abstract public class AwaitingQuorumState extends OperationState {
         return nextState;
     }
 
-    public String toString () {
+    public String toString() {
         return NAME;
     }
 
-    public State processNetworkMessage (NetworkConversationMessage message) {
+    public State processNetworkMessage(NetworkConversationMessage message) {
         if (!(message.getWireMessage() instanceof WireResponse)) {
             logger.warn("Got non-response network message: " + message + ", ignoring.");
             return getOperation().getCurrentState();

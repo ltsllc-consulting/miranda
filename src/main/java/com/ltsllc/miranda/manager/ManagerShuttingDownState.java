@@ -20,6 +20,7 @@ import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.ShutdownResponseMessage;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.StopState;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -33,23 +34,23 @@ public class ManagerShuttingDownState extends State {
         return requester;
     }
 
-    public Manager getManager () {
+    public Manager getManager() {
         return (Manager) getContainer();
     }
 
-    public ManagerShuttingDownState (Manager manager, BlockingQueue<Message> requester) {
+    public ManagerShuttingDownState(Manager manager, BlockingQueue<Message> requester) throws MirandaException {
         super(manager);
 
         this.requester = requester;
     }
 
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getManager().getCurrentState();
 
         switch (message.getSubject()) {
             case ShutdownResponse: {
                 ShutdownResponseMessage shutdownResponseMessage = (ShutdownResponseMessage) message;
-                nextState = processShutdownResponseMessage (shutdownResponseMessage);
+                nextState = processShutdownResponseMessage(shutdownResponseMessage);
                 break;
             }
 
@@ -63,7 +64,7 @@ public class ManagerShuttingDownState extends State {
     }
 
 
-    public State processShutdownResponseMessage (ShutdownResponseMessage shutdownResponseMessage) {
+    public State processShutdownResponseMessage(ShutdownResponseMessage shutdownResponseMessage) {
         ShutdownResponseMessage shutdownResponseMessage2 = new ShutdownResponseMessage(getManager().getQueue(), this,
                 getManager().getName());
 

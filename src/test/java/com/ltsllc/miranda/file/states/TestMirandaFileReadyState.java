@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.file.states;
 
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.event.EventsFile;
 import com.ltsllc.miranda.file.messages.FileChangedMessage;
 import com.ltsllc.miranda.test.TestCase;
@@ -57,12 +58,12 @@ public class TestMirandaFileReadyState extends TestCase {
         return mirandaFileReadyState;
     }
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
     }
 
     @Before
-    public void setup () {
+    public void setup () throws MirandaException {
         reset();
 
         super.setup();
@@ -72,7 +73,7 @@ public class TestMirandaFileReadyState extends TestCase {
         setupMirandaProperties();
 
         createFileSystem(ROOT, FILE_SYSTEM_SPEC);
-        setupFileWatcher(100);
+        setupFileWatcherService(100);
 
         this.mockEventsFile = mock(EventsFile.class);
         this.mirandaFileReadyState = new MirandaFileReadyState(getMockEventsFile());
@@ -84,7 +85,7 @@ public class TestMirandaFileReadyState extends TestCase {
     }
 
     @Test
-    public void testProcessFileChangedMessage () {
+    public void testProcessFileChangedMessage () throws MirandaException {
         File file = new File(FILENAME);
         FileChangedMessage message = new FileChangedMessage(null,this, file);
         getMirandaFileReadyState().processMessage(message);

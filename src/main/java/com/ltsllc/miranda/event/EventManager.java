@@ -44,7 +44,7 @@ public class EventManager extends DirectoryManager {
 
     private Map<String, Event> eventMap;
 
-    public EventManager(String directoryName, int objectLimit, Reader reader, Writer writer) throws IOException {
+    public EventManager(String directoryName, int objectLimit, Reader reader, Writer writer) throws IOException, MirandaException {
         super(NAME, directoryName, objectLimit, reader, writer);
 
         EventManagerReadyState eventManagerReadyState = new EventManagerReadyState(this);
@@ -53,12 +53,12 @@ public class EventManager extends DirectoryManager {
 
     /**
      * Start the manager.
-     *
      * <p>
-     *     This entails starting periodic evictions.
+     * <p>
+     * This entails starting periodic evictions.
      * </p>
      */
-    public void start () {
+    public void start() {
         try {
             long period = Miranda.properties.getLongProperty(MirandaProperties.PROPERTY_EVENT_EVICTION_PERIOD);
             EvictMessage evictEventsMessage = new EvictMessage();

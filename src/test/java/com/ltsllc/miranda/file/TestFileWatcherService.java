@@ -17,8 +17,9 @@
 package com.ltsllc.miranda.file;
 
 import com.ltsllc.miranda.Message;
-import com.ltsllc.miranda.file.messages.UnwatchFileMessage;
-import com.ltsllc.miranda.file.messages.WatchMessage;
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.file.messages.StopWatchingMessage;
+import com.ltsllc.miranda.file.messages.WatchFileMessage;
 import com.ltsllc.miranda.file.states.FileWatcherReadyState;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.test.TestCase;
@@ -28,9 +29,12 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Clark on 2/26/2017.
@@ -55,11 +59,7 @@ public class TestFileWatcherService extends TestCase {
         return queue;
     }
 
-    public FileWatcherService getFileWatcherService() {
-        return fileWatcherService;
-    }
-
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
 
         if (null != Miranda.getInstance())
@@ -71,19 +71,17 @@ public class TestFileWatcherService extends TestCase {
 
 
     @Before
-    public void setup () {
+    public void setup () throws MirandaException {
         reset();
 
         super.setup();
 
         setuplog4j();
         setupMirandaProperties();
-        setupFileWatcher(100);
+        setupFileWatcherService(100);
 
+        queue = new LinkedBlockingQueue<Message>();
         createFileSystem(ROOT, FILE_SYSTEM_SPEC);
-
-        this.fileWatcherService = Miranda.fileWatcher;
-        this.queue = new LinkedBlockingQueue<Message>();
     }
 
     @After
@@ -93,59 +91,34 @@ public class TestFileWatcherService extends TestCase {
 
     @Test
     public void testConstructor () {
-        assert (getFileWatcherService().getCurrentState() instanceof FileWatcherReadyState);
-    }
-
-    /**
-     * Note that this also tests the {@link FileWatcherService#watch(File, BlockingQueue)}
-     * and {@link FileWatcherService#fireChanged(String)} methods.
-     */
-    @Test
-    public void testCheckFiles () throws IOException{
-        File file = new File(FILENAME);
-        WatchMessage watchMessage = new WatchMessage(getQueue(), this, file);
-        send(watchMessage, getFileWatcherService().getQueue());
-
-        pause(125);
-
-        String canonicalName = file.getCanonicalPath();
-        List<FileWatcher> list = getFileWatcherService().getWatchers().get(canonicalName);
-        Long value = getFileWatcherService().getWatchedFiles().get(canonicalName);
-        assert (null != list);
-        assert (null != value);
+        assert (Miranda.fileWatcher.getCurrentState() instanceof FileWatcherReadyState);
     }
 
     @Test
-    public void testStopWatching () {
+    public void testStopWatching() throws IOException {
         File file = new File(FILENAME);
-        BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
-        WatchMessage watchMessage = new WatchMessage(getQueue(), this, file);
-        send(watchMessage, getFileWatcherService().getQueue());
+        Miranda.fileWatcher.watchFile(file, getQueue());
 
-        pause(500);
+        pause(1000);
 
-        long time = touch(file);
-        time++;
-        touch (file, time);
+        touch(file);
 
-        pause(500);
+        pause(1500);
 
-        getFileWatcherService().checkFiles();
+        Miranda.fileWatcher.checkFiles();
 
         assert (contains(Message.Subjects.FileChanged, getQueue()));
 
-        UnwatchFileMessage unwatchFileMessage = new UnwatchFileMessage(getQueue(), this, file);
-        send(unwatchFileMessage, getFileWatcherService().getQueue());
+        StopWatchingMessage stopWatchingMessage = new StopWatchingMessage(getQueue(), this, file, getQueue());
+        send(stopWatchingMessage, Miranda.fileWatcher.getQueue());
 
         pause (250);
 
         getQueue().clear();
 
-        time = touch(file);
-        time++;
-        touch(file, time);
+        touch(file);
 
-        pause(250);
+        pause(1500);
 
         assert (!(contains(Message.Subjects.FileChanged, getQueue())));
     }

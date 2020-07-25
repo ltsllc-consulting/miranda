@@ -18,6 +18,7 @@ package com.ltsllc.miranda.subsciptions;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
 import com.ltsllc.miranda.clientinterface.results.Results;
 import com.ltsllc.miranda.file.messages.FileLoadedMessage;
@@ -32,51 +33,51 @@ import java.util.List;
  * Created by Clark on 4/12/2017.
  */
 public class SubscriptionManagerReadyState extends StandardManagerReadyState<Subscription> {
-    public SubscriptionManager getSubscriptionManager () {
+    public SubscriptionManager getSubscriptionManager() {
         return (SubscriptionManager) getContainer();
     }
 
-    public SubscriptionManagerReadyState(SubscriptionManager subscriptionManager) {
+    public SubscriptionManagerReadyState(SubscriptionManager subscriptionManager) throws MirandaException {
         super(subscriptionManager);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getSubscriptionManager().getCurrentState();
 
         switch (message.getSubject()) {
             case OwnerQuery: {
                 OwnerQueryMessage ownerQueryMessage = (OwnerQueryMessage) message;
-                nextState = processOwnerQueryMessage (ownerQueryMessage);
+                nextState = processOwnerQueryMessage(ownerQueryMessage);
                 break;
             }
 
             case CreateSubscription: {
                 CreateSubscriptionMessage createSubscriptionMessage = (CreateSubscriptionMessage) message;
-                nextState = processCreateSubscriptionMessage (createSubscriptionMessage);
+                nextState = processCreateSubscriptionMessage(createSubscriptionMessage);
                 break;
             }
 
             case GetSubcription: {
                 GetSubscriptionMessage getSubscriptionMessage = (GetSubscriptionMessage) message;
-                nextState = processGetSubscriptionMessage (getSubscriptionMessage);
+                nextState = processGetSubscriptionMessage(getSubscriptionMessage);
                 break;
             }
 
             case ListSubscriptions: {
                 LIstSubscriptionsMessage getSubscriptionsMessage = (LIstSubscriptionsMessage) message;
-                nextState = processGetSubscriptionsMessage (getSubscriptionsMessage);
+                nextState = processGetSubscriptionsMessage(getSubscriptionsMessage);
                 break;
             }
 
             case UpdateSubscription: {
                 UpdateSubscriptionMessage updateSubscriptionMessage = (UpdateSubscriptionMessage) message;
-                nextState = processUpdateSubscriptionMessage (updateSubscriptionMessage);
+                nextState = processUpdateSubscriptionMessage(updateSubscriptionMessage);
                 break;
             }
 
             case DeleteSubscription: {
                 DeleteSubscriptionMessage deleteSubscriptionMessage = (DeleteSubscriptionMessage) message;
-                nextState = processDeleteSubscriptionMessage (deleteSubscriptionMessage);
+                nextState = processDeleteSubscriptionMessage(deleteSubscriptionMessage);
                 break;
             }
 
@@ -88,7 +89,7 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return nextState;
     }
 
-    public State processOwnerQueryMessage (OwnerQueryMessage ownerQueryMessage) {
+    public State processOwnerQueryMessage(OwnerQueryMessage ownerQueryMessage) throws MirandaException {
         List<String> property = new ArrayList<String>();
 
         OwnerQueryResponseMessage ownerQueryResponseMessage = new OwnerQueryResponseMessage(ownerQueryMessage.getSender(),
@@ -99,14 +100,14 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    public State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         getSubscriptionManager().performGarbageCollection();
 
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processCreateSubscriptionMessage(CreateSubscriptionMessage createSubscriptionMessage) {
-        Results result = getSubscriptionManager().createSubscription (createSubscriptionMessage.getSubscription());
+    public State processCreateSubscriptionMessage(CreateSubscriptionMessage createSubscriptionMessage) throws MirandaException {
+        Results result = getSubscriptionManager().createSubscription(createSubscriptionMessage.getSubscription());
         CreateSubscriptionResponseMessage response = new CreateSubscriptionResponseMessage(getSubscriptionManager().getQueue(),
                 this, result);
         createSubscriptionMessage.reply(response);
@@ -114,7 +115,7 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processGetSubscriptionMessage (GetSubscriptionMessage getSubscriptionMessage) {
+    public State processGetSubscriptionMessage(GetSubscriptionMessage getSubscriptionMessage) throws MirandaException {
         Results result;
 
         Subscription subscription = getSubscriptionManager().findSubscription(getSubscriptionMessage.getName());
@@ -131,7 +132,7 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processGetSubscriptionsMessage (LIstSubscriptionsMessage getSubscriptionsMessage) {
+    public State processGetSubscriptionsMessage(LIstSubscriptionsMessage getSubscriptionsMessage) throws MirandaException {
         GetSubscriptionsResponseMessage response = new GetSubscriptionsResponseMessage(getSubscriptionManager().getQueue(),
                 this, getSubscriptionManager().getSubscriptions());
 
@@ -140,7 +141,7 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processUpdateSubscriptionMessage (UpdateSubscriptionMessage updateSubscriptionMessage) {
+    public State processUpdateSubscriptionMessage(UpdateSubscriptionMessage updateSubscriptionMessage) throws MirandaException {
         getSubscriptionManager().updateSubscription(updateSubscriptionMessage.getSubscription());
 
         UpdateSubscriptionResponseMessage response = new UpdateSubscriptionResponseMessage(getSubscriptionManager().getQueue(),
@@ -151,7 +152,7 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processDeleteSubscriptionMessage (DeleteSubscriptionMessage deleteSubscriptionMessage) {
+    public State processDeleteSubscriptionMessage(DeleteSubscriptionMessage deleteSubscriptionMessage) throws MirandaException {
         getSubscriptionManager().deleteSubscription(deleteSubscriptionMessage.getSubscriptionName());
 
         DeleteSubscriptionResponseMessage response = new DeleteSubscriptionResponseMessage(getSubscriptionManager().getQueue(),
@@ -162,10 +163,10 @@ public class SubscriptionManagerReadyState extends StandardManagerReadyState<Sub
         return getSubscriptionManager().getCurrentState();
     }
 
-    public State processFileLoadedMessage (FileLoadedMessage fileLoadedMessage) {
+    public State processFileLoadedMessage(FileLoadedMessage fileLoadedMessage) {
         List<Subscription> subscriptions = (List<Subscription>) fileLoadedMessage.getData();
 
-        getSubscriptionManager().setSubscriptions (subscriptions);
+        getSubscriptionManager().setSubscriptions(subscriptions);
 
         return getSubscriptionManager().getCurrentState();
     }

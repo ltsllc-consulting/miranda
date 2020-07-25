@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.subsciptions;
 
 import com.google.gson.reflect.TypeToken;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.file.states.SingleFileReadyState;
@@ -36,7 +37,7 @@ public class SubscriptionsFileReadyState extends SingleFileReadyState {
 
     private SubscriptionsFile subscriptionsFile;
 
-    public SubscriptionsFileReadyState (SubscriptionsFile subscriptionsFile) {
+    public SubscriptionsFileReadyState(SubscriptionsFile subscriptionsFile) throws MirandaException {
         super(subscriptionsFile);
 
         this.subscriptionsFile = subscriptionsFile;
@@ -76,7 +77,8 @@ public class SubscriptionsFileReadyState extends SingleFileReadyState {
 
     @Override
     public Type getListType() {
-        return new TypeToken<List<User>>() {}.getType();
+        return new TypeToken<List<User>>() {
+        }.getType();
     }
 
     @Override

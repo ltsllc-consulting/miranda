@@ -19,7 +19,8 @@ package com.ltsllc.miranda.cluster;
 import com.ltsllc.miranda.Consumer;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.Version;
-import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.clientinterface.basicclasses.*;
 import com.ltsllc.miranda.cluster.messages.LoadMessage;
 import com.ltsllc.miranda.cluster.states.ClusterFileStartingState;
 import com.ltsllc.miranda.miranda.Miranda;
@@ -83,7 +84,7 @@ public class TestClusterFile extends TestCase {
         return cluster;
     }
 
-    public void setupClusterFile() throws IOException {
+    public void setupClusterFile() throws IOException, MirandaException {
         MirandaProperties properties = Miranda.properties;
         String filename = properties.getProperty(MirandaProperties.PROPERTY_CLUSTER_FILE);
 
@@ -100,7 +101,7 @@ public class TestClusterFile extends TestCase {
         this.clusterFile.setData(nodeElementList);
     }
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
 
         Miranda.properties = null;
@@ -109,7 +110,7 @@ public class TestClusterFile extends TestCase {
 
 
     @Before
-    public void setup() {
+    public void setup() throws MirandaException {
         reset();
 
         super.setup();
@@ -201,24 +202,23 @@ public class TestClusterFile extends TestCase {
     }
 
     @Test
-    public void testMergeNewElement () {
+    public void testMergeNewElement () throws IOException {
         NodeElement newElement = new NodeElement("bar.com", 6789, "a new element");
         List<NodeElement> newElementList = new ArrayList<NodeElement>();
         newElementList.add(newElement);
 
+        List<Subscription> subscriptionList = null;
+
         Version oldVersion = getClusterFile().getVersion();
 
-        BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
-        when(getMockWriter().getQueue()).thenReturn(queue);
-
         getClusterFile().merge(newElementList);
+
 
         Version newVersion = getClusterFile().getVersion();
 
         assert (getClusterFile().contains(newElement));
         assert (oldVersion != newVersion);
-        assert (contains(Message.Subjects.Write, queue));
-        assert (contains(Message.Subjects.ClusterFileChanged, getCluster()));
+        verify(getMockWriter()).sendWrite(Matchers.any(BlockingQueue.class), Matchers.any(), Matchers.anyString(), Matchers.any(byte[].class));
     }
 
     @Test
@@ -228,7 +228,6 @@ public class TestClusterFile extends TestCase {
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
         when(getMockWriter().getQueue()).thenReturn(queue);
 
-        getClusterFile().merge(new ArrayList<NodeElement>());
 
         Version newVersion = getClusterFile().getVersion();
         assert (oldVersion.equals(newVersion));

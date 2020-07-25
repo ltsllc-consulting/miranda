@@ -18,6 +18,7 @@ package com.ltsllc.miranda.servlet.miranda;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.objects.StatusObject;
 import com.ltsllc.miranda.servlet.status.GetStatusResponseMessage;
 import com.ltsllc.miranda.servlet.status.StatusServlet;
@@ -36,16 +37,16 @@ public class MirandaStatusReadyState extends State {
         this.statusServlet = statusServlet;
     }
 
-    public MirandaStatusReadyState (MirandaStatus mirandaStatus) {
+    public MirandaStatusReadyState(MirandaStatus mirandaStatus) throws MirandaException {
         super(mirandaStatus);
     }
 
-    public MirandaStatus getMirandaStatus () {
+    public MirandaStatus getMirandaStatus() {
         return (MirandaStatus) getContainer();
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
@@ -64,7 +65,7 @@ public class MirandaStatusReadyState extends State {
         return nextState;
     }
 
-    private State processGetStatusResponseMessage (GetStatusResponseMessage getStatusResponseMessage) {
+    private State processGetStatusResponseMessage(GetStatusResponseMessage getStatusResponseMessage) {
         StatusObject statusObject = (StatusObject) getStatusResponseMessage.getStatusObject();
         getMirandaStatus().receivedStatus(statusObject);
 

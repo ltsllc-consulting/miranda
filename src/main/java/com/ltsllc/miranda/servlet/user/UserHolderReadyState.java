@@ -18,6 +18,7 @@ package com.ltsllc.miranda.servlet.user;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.servlet.ServletHolderReadyState;
 import com.ltsllc.miranda.user.messages.*;
 
@@ -25,15 +26,15 @@ import com.ltsllc.miranda.user.messages.*;
  * Created by Clark on 4/5/2017.
  */
 public class UserHolderReadyState extends ServletHolderReadyState {
-    public UserHolder getUserHolder () {
+    public UserHolder getUserHolder() {
         return (UserHolder) getContainer();
     }
 
-    public UserHolderReadyState(UserHolder userHolder) {
+    public UserHolderReadyState(UserHolder userHolder) throws MirandaException {
         super(userHolder);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getUserHolder().getCurrentState();
 
         switch (message.getSubject()) {
@@ -51,19 +52,19 @@ public class UserHolderReadyState extends ServletHolderReadyState {
 
             case CreateUserResponse: {
                 CreateUserResponseMessage response = (CreateUserResponseMessage) message;
-                nextState = processCreateUserResponseMessage (response);
+                nextState = processCreateUserResponseMessage(response);
                 break;
             }
 
             case UpdateUserResponse: {
                 UpdateUserResponseMessage response = (UpdateUserResponseMessage) message;
-                nextState = processUpdateUserResponseMessage (response);
+                nextState = processUpdateUserResponseMessage(response);
                 break;
             }
 
             case DeleteUserResponse: {
                 DeleteUserResponseMessage response = (DeleteUserResponseMessage) message;
-                nextState = processDeleteUserResponseMessage (response);
+                nextState = processDeleteUserResponseMessage(response);
                 break;
             }
 
@@ -76,32 +77,32 @@ public class UserHolderReadyState extends ServletHolderReadyState {
         return nextState;
     }
 
-    public State processGetUsersResponseMessage (GetUsersResponseMessage getUsersResponseMessage) {
-        getUserHolder().setUsersAndAwaken (getUsersResponseMessage.getUsers());
+    public State processGetUsersResponseMessage(GetUsersResponseMessage getUsersResponseMessage) {
+        getUserHolder().setUsersAndAwaken(getUsersResponseMessage.getUsers());
 
         return getUserHolder().getCurrentState();
     }
 
-    public State processGetUserResponseMessage (GetUserResponseMessage getUserResponseMessage) {
+    public State processGetUserResponseMessage(GetUserResponseMessage getUserResponseMessage) {
         getUserHolder().setGetUserResults(getUserResponseMessage.getResult());
         getUserHolder().setUserAndAwaken(getUserResponseMessage.getUser());
 
         return getUserHolder().getCurrentState();
     }
 
-    public State processCreateUserResponseMessage (CreateUserResponseMessage createUserResponseMessage) {
+    public State processCreateUserResponseMessage(CreateUserResponseMessage createUserResponseMessage) {
         getUserHolder().setUserCreatedAndAwaken(createUserResponseMessage.getResult());
 
         return getUserHolder().getCurrentState();
     }
 
-    public State processUpdateUserResponseMessage (UpdateUserResponseMessage updateUserResponseMessage) {
+    public State processUpdateUserResponseMessage(UpdateUserResponseMessage updateUserResponseMessage) {
         getUserHolder().setUserUpdatedAndAwaken(updateUserResponseMessage.getResult());
 
         return getUserHolder().getCurrentState();
     }
 
-    public State processDeleteUserResponseMessage (DeleteUserResponseMessage deleteUserResponseMessage) {
+    public State processDeleteUserResponseMessage(DeleteUserResponseMessage deleteUserResponseMessage) {
         getUserHolder().setUserDeletedAndAwaken(deleteUserResponseMessage.getResult());
 
         return getUserHolder().getCurrentState();

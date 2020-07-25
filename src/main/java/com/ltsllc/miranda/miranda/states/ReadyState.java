@@ -19,8 +19,8 @@ package com.ltsllc.miranda.miranda.states;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.ShutdownMessage;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.objects.NodeStatus;
-import com.ltsllc.miranda.clientinterface.objects.StatusObject;
 import com.ltsllc.miranda.cluster.ClusterFile;
 import com.ltsllc.miranda.cluster.messages.RemoteVersionMessage;
 import com.ltsllc.miranda.cluster.messages.VersionsMessage;
@@ -78,11 +78,11 @@ public class ReadyState extends State {
     private Map<String, BlockingQueue<Message>> createUserToQueue = new HashMap<String, BlockingQueue<Message>>();
     private Map<String, BlockingQueue<Message>> updateUserToQueue = new HashMap<String, BlockingQueue<Message>>();
 
-    public static void setLogger (Logger logger) {
+    public static void setLogger(Logger logger) {
         ReadyState.logger = logger;
     }
 
-    public ReadyState (Miranda miranda) {
+    public ReadyState(Miranda miranda) throws MirandaException {
         super(miranda);
     }
 
@@ -107,7 +107,7 @@ public class ReadyState extends State {
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
@@ -131,7 +131,7 @@ public class ReadyState extends State {
 
             case Version: {
                 VersionMessage versionMessage = (VersionMessage) message;
-                nextState = processVersionMessage (versionMessage);
+                nextState = processVersionMessage(versionMessage);
                 break;
             }
 
@@ -161,13 +161,13 @@ public class ReadyState extends State {
 
             case DeleteUser: {
                 DeleteUserMessage deleteUserMessage = (DeleteUserMessage) message;
-                nextState = processDeleteUserMessage (deleteUserMessage);
+                nextState = processDeleteUserMessage(deleteUserMessage);
                 break;
             }
 
             case CreateUser: {
                 CreateUserMessage createUserMessage = (CreateUserMessage) message;
-                nextState = processCreateUserMessage (createUserMessage);
+                nextState = processCreateUserMessage(createUserMessage);
                 break;
             }
 
@@ -179,37 +179,37 @@ public class ReadyState extends State {
 
             case UpdateTopic: {
                 UpdateTopicMessage updateTopicMessage = (UpdateTopicMessage) message;
-                nextState = processUpdateTopicMessage (updateTopicMessage);
+                nextState = processUpdateTopicMessage(updateTopicMessage);
                 break;
             }
 
             case DeleteTopic: {
                 DeleteTopicMessage deleteTopicMessage = (DeleteTopicMessage) message;
-                nextState = processDeleteTopicMessage (deleteTopicMessage);
+                nextState = processDeleteTopicMessage(deleteTopicMessage);
                 break;
             }
 
             case UpdateUser: {
                 UpdateUserMessage updateUserMessage = (UpdateUserMessage) message;
-                nextState = processUpdateUserMessage (updateUserMessage);
+                nextState = processUpdateUserMessage(updateUserMessage);
                 break;
             }
 
             case UserAdded: {
                 UserAddedMessage userAddedMessage = (UserAddedMessage) message;
-                nextState = processUserAddedMessage (userAddedMessage);
+                nextState = processUserAddedMessage(userAddedMessage);
                 break;
             }
 
             case UserUpdated: {
                 UserUpdatedMessage userUpdatedMessage = (UserUpdatedMessage) message;
-                nextState = processUserUpdatedMessage (userUpdatedMessage);
+                nextState = processUserUpdatedMessage(userUpdatedMessage);
                 break;
             }
 
             case UserDeleted: {
                 UserDeletedMessage userDeletedMessage = (UserDeletedMessage) message;
-                nextState = processUserDeletedMessage (userDeletedMessage);
+                nextState = processUserDeletedMessage(userDeletedMessage);
                 break;
             }
 
@@ -221,31 +221,31 @@ public class ReadyState extends State {
 
             case CreateSubscription: {
                 CreateSubscriptionMessage createSubscriptionMessage = (CreateSubscriptionMessage) message;
-                nextState = processCreateSubscriptionMessage (createSubscriptionMessage);
+                nextState = processCreateSubscriptionMessage(createSubscriptionMessage);
                 break;
             }
 
             case UpdateSubscription: {
                 UpdateSubscriptionMessage updateSubscriptionMessage = (UpdateSubscriptionMessage) message;
-                nextState = processUpdateSubscriptionMessage (updateSubscriptionMessage);
+                nextState = processUpdateSubscriptionMessage(updateSubscriptionMessage);
                 break;
             }
 
             case DeleteSubscription: {
                 DeleteSubscriptionMessage deleteSubscriptionMessage = (DeleteSubscriptionMessage) message;
-                nextState = processDeleteSubscriptionMessage (deleteSubscriptionMessage);
+                nextState = processDeleteSubscriptionMessage(deleteSubscriptionMessage);
                 break;
             }
 
             case Auction: {
                 AuctionMessage auctionMessage = (AuctionMessage) message;
-                nextState = processAuctionMessage (auctionMessage);
+                nextState = processAuctionMessage(auctionMessage);
                 break;
             }
 
             case Shutdown: {
                 ShutdownMessage shutdownMessage = (ShutdownMessage) message;
-                nextState = processShutdownMessage (shutdownMessage);
+                nextState = processShutdownMessage(shutdownMessage);
                 break;
             }
 
@@ -257,12 +257,12 @@ public class ReadyState extends State {
         return nextState;
     }
 
-    private State processNewConnectionMessage (NewConnectionMessage newConnectionMessage) {
+    private State processNewConnectionMessage(NewConnectionMessage newConnectionMessage) {
         return getMiranda().getCurrentState();
     }
 
 
-    private State processVersionsMessage (VersionsMessage versionsMessage) {
+    private State processVersionsMessage(VersionsMessage versionsMessage) {
         for (NameVersion nameVersion : versionsMessage.getVersions()) {
             RemoteVersionMessage remoteVersionMessage = new RemoteVersionMessage(getMiranda().getQueue(), this, versionsMessage.getSender(), nameVersion);
 
@@ -281,7 +281,7 @@ public class ReadyState extends State {
     }
 
 
-    private State processGetVersionsMessage (GetVersionsMessage getVersionsMessage) {
+    private State processGetVersionsMessage(GetVersionsMessage getVersionsMessage) throws MirandaException {
         GetVersionMessage getVersionMessage = new GetVersionMessage(getMiranda().getQueue(), this, getMiranda().getQueue());
 
         send(Miranda.getInstance().getCluster().getQueue(), getVersionMessage);
@@ -289,17 +289,17 @@ public class ReadyState extends State {
         send(TopicsFile.getInstance().getQueue(), getVersionMessage);
         send(SubscriptionsFile.getInstance().getQueue(), getVersionMessage);
 
-        GettingVersionsState gettingVersionsState= new GettingVersionsState(getMiranda(), getVersionsMessage.getSender());
+        GettingVersionsState gettingVersionsState = new GettingVersionsState(getMiranda(), getVersionsMessage.getSender());
         return gettingVersionsState;
     }
 
 
-    private State processVersionMessage (VersionMessage versionMessage) {
+    private State processVersionMessage(VersionMessage versionMessage) {
         logger.error("processVersionMessage called");
         return this;
     }
 
-    private State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    private State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         getMiranda().getUserManager().sendGarbageCollectionMessage(getMiranda().getQueue(), this);
         getMiranda().getTopicManager().sendGarbageCollectionMessage(getMiranda().getQueue(), this);
         getMiranda().getSubscriptionManager().sendGarbageCollectionMessage(getMiranda().getQueue(), this);
@@ -307,7 +307,7 @@ public class ReadyState extends State {
         return this;
     }
 
-    private State processGetStatusMessage (GetStatusMessage getStatusMessage) {
+    private State processGetStatusMessage(GetStatusMessage getStatusMessage) throws MirandaException {
         NodeStatus statusObject = getMiranda().getStatusImpl();
 
         GetStatusResponseMessage response = new GetStatusResponseMessage(getMiranda().getQueue(), this, statusObject);
@@ -322,13 +322,13 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processSessionsExpiredMessage (SessionsExpiredMessage sessionsExpiredMessage) {
-        getMiranda().getSessionManager().sendSessionsExpiredMessage (getMiranda().getQueue(), this, sessionsExpiredMessage.getExpiredSessions());
+    public State processSessionsExpiredMessage(SessionsExpiredMessage sessionsExpiredMessage) {
+        getMiranda().getSessionManager().sendSessionsExpiredMessage(getMiranda().getQueue(), this, sessionsExpiredMessage.getExpiredSessions());
 
         return getMiranda().getCurrentState();
     }
 
-    public State processDeleteUserMessage (DeleteUserMessage deleteUserMessage) {
+    public State processDeleteUserMessage(DeleteUserMessage deleteUserMessage) throws MirandaException {
         DeleteUserOperation deleteUserOperation = new DeleteUserOperation(deleteUserMessage.getSender(),
                 deleteUserMessage.getSession(), deleteUserMessage.getName());
 
@@ -337,7 +337,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processCreateUserMessage (CreateUserMessage createUserMessage) {
+    public State processCreateUserMessage(CreateUserMessage createUserMessage) throws MirandaException {
         CreateUserOperation createUserOperation = new CreateUserOperation(createUserMessage.getSender(),
                 createUserMessage.getSession(), createUserMessage.getUser());
         createUserOperation.start();
@@ -345,7 +345,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processUpdateUserMessage (UpdateUserMessage updateUserMessage) {
+    public State processUpdateUserMessage(UpdateUserMessage updateUserMessage) throws MirandaException {
         UpdateUserOperation updateUserOperation = new UpdateUserOperation(updateUserMessage.getSender(),
                 updateUserMessage.getSession(), updateUserMessage.getUser());
 
@@ -354,32 +354,32 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processUserAddedMessage (UserAddedMessage userAddedMessage) {
-        getMiranda().getUserManager().sendUserAddedMessage (getMiranda().getQueue(), this, userAddedMessage.getUser());
+    public State processUserAddedMessage(UserAddedMessage userAddedMessage) {
+        getMiranda().getUserManager().sendUserAddedMessage(getMiranda().getQueue(), this, userAddedMessage.getUser());
 
         return getMiranda().getCurrentState();
     }
 
-    public State processUserUpdatedMessage (UserUpdatedMessage userUpdatedMessage) {
-        getMiranda().getUserManager().sendUserUpdatedMessage (getMiranda().getQueue(), this, userUpdatedMessage.getUser());
+    public State processUserUpdatedMessage(UserUpdatedMessage userUpdatedMessage) {
+        getMiranda().getUserManager().sendUserUpdatedMessage(getMiranda().getQueue(), this, userUpdatedMessage.getUser());
 
         return getMiranda().getCurrentState();
     }
 
-    public State processUserDeletedMessage (UserDeletedMessage userDeletedMessage) {
-        getMiranda().getUserManager().sendUserDeletedMessage (getMiranda().getQueue(), this, userDeletedMessage.getName());
+    public State processUserDeletedMessage(UserDeletedMessage userDeletedMessage) {
+        getMiranda().getUserManager().sendUserDeletedMessage(getMiranda().getQueue(), this, userDeletedMessage.getName());
 
         return getMiranda().getCurrentState();
     }
 
-    public State processLoginMessage (LoginMessage loginMessage) {
+    public State processLoginMessage(LoginMessage loginMessage) throws MirandaException {
         LoginOperation loginOperation = new LoginOperation(loginMessage.getName(), loginMessage.getSender());
         loginOperation.start();
 
         return getMiranda().getCurrentState();
     }
 
-    public State processCreateTopicMessage (CreateTopicMessage createTopicMessage) {
+    public State processCreateTopicMessage(CreateTopicMessage createTopicMessage) throws MirandaException {
         CreateTopicOperation createTopicOperation = new CreateTopicOperation(createTopicMessage.getSender(),
                 createTopicMessage.getSession(), createTopicMessage.getTopic());
 
@@ -388,7 +388,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processCreateSubscriptionMessage (CreateSubscriptionMessage createSubscriptionMessage) {
+    public State processCreateSubscriptionMessage(CreateSubscriptionMessage createSubscriptionMessage) throws MirandaException {
         CreateSubscriptionOperation createSubscriptionOperation = new CreateSubscriptionOperation(createSubscriptionMessage.getSender(),
                 createSubscriptionMessage.getSession(), createSubscriptionMessage.getSubscription());
 
@@ -397,7 +397,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processUpdateSubscriptionMessage (UpdateSubscriptionMessage updateSubscriptionMessage) {
+    public State processUpdateSubscriptionMessage(UpdateSubscriptionMessage updateSubscriptionMessage) throws MirandaException {
         UpdateSubscriptionOperation updateSubscriptionOperation = new UpdateSubscriptionOperation(updateSubscriptionMessage.getSender(),
                 updateSubscriptionMessage.getSession(), updateSubscriptionMessage.getSubscription());
 
@@ -406,7 +406,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processDeleteSubscriptionMessage (DeleteSubscriptionMessage deleteSubscriptionMessage) {
+    public State processDeleteSubscriptionMessage(DeleteSubscriptionMessage deleteSubscriptionMessage) throws MirandaException {
         DeleteSubscriptionOperation deleteSubscriptionOperation = new DeleteSubscriptionOperation(deleteSubscriptionMessage.getSender(),
                 deleteSubscriptionMessage.getSession(), deleteSubscriptionMessage.getSubscriptionName());
 
@@ -415,14 +415,14 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processAuctionMessage (AuctionMessage auctionMessage) {
+    public State processAuctionMessage(AuctionMessage auctionMessage) throws MirandaException {
         AuctionOperation auctionOperation = new AuctionOperation();
         auctionOperation.start();
 
         return getMiranda().getCurrentState();
     }
 
-    public State processUpdateTopicMessage (UpdateTopicMessage updateTopicMessage) {
+    public State processUpdateTopicMessage(UpdateTopicMessage updateTopicMessage) throws MirandaException {
         UpdateTopicOperation updateTopicOperation = new UpdateTopicOperation(updateTopicMessage.getSender(),
                 updateTopicMessage.getSession(), updateTopicMessage.getTopic());
 
@@ -431,7 +431,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processDeleteTopicMessage (DeleteTopicMessage deleteTopicMessage) {
+    public State processDeleteTopicMessage(DeleteTopicMessage deleteTopicMessage) throws MirandaException {
         DeleteTopicOperation deleteTopicOperation = new DeleteTopicOperation(deleteTopicMessage.getSender(),
                 deleteTopicMessage.getSession(), deleteTopicMessage.getTopicName());
 
@@ -440,7 +440,7 @@ public class ReadyState extends State {
         return getMiranda().getCurrentState();
     }
 
-    public State processShutdownMessage (ShutdownMessage shutdownMessage) {
+    public State processShutdownMessage(ShutdownMessage shutdownMessage) throws MirandaException {
         getMiranda().shutdown();
 
         ShuttingDownState shuttingDownState = new ShuttingDownState(getMiranda());

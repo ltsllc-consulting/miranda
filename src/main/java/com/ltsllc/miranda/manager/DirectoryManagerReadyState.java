@@ -2,21 +2,22 @@ package com.ltsllc.miranda.manager;
 
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.messages.FileChangedMessage;
 
 /**
  * Created by Clark on 6/8/2017.
  */
 public class DirectoryManagerReadyState extends State {
-    public DirectoryManagerReadyState (DirectoryManager directoryManager) {
+    public DirectoryManagerReadyState(DirectoryManager directoryManager) throws MirandaException {
         super(directoryManager);
     }
 
-    public DirectoryManager getDirectoryManager () {
+    public DirectoryManager getDirectoryManager() {
         return (DirectoryManager) getContainer();
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getDirectoryManager().getCurrentState();
 
         switch (message.getSubject()) {
@@ -35,9 +36,6 @@ public class DirectoryManagerReadyState extends State {
     }
 
     public State processFileChangedMessage(FileChangedMessage fileChangedMessage) {
-        getDirectoryManager().getReader().sendReadMessage(getDirectoryManager().getQueue(), this,
-                fileChangedMessage.getFile());
-
         return getDirectoryManager().getCurrentState();
     }
 }

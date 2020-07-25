@@ -16,6 +16,8 @@
 
 package com.ltsllc.miranda.node.states;
 
+import com.ltsllc.clcl.JavaKeyStore;
+import com.ltsllc.clcl.PublicKey;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.Version;
@@ -62,14 +64,14 @@ public class TestNodeReadyState extends TesterNodeState {
         return readyState;
     }
 
-    public void reset() {
+    public void reset() throws MirandaException {
         super.reset();
 
         readyState = null;
     }
 
     @Before
-    public void setup() {
+    public void setup() throws MirandaException {
         reset();
 
         super.setup();
@@ -78,7 +80,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testProcessVersionMessage() {
+    public void testProcessVersionMessage() throws MirandaException {
         Version version = new Version();
         NameVersion nameVersion = new NameVersion("whatever", version);
         List<NameVersion> nameVersions = new ArrayList<NameVersion>();
@@ -93,7 +95,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
 
-    public void testGetFileMessage(String file) {
+    public void testGetFileMessage(String file) throws MirandaException {
         Message message = null;
 
         if (file.equalsIgnoreCase(UsersFile.FILE_NAME))
@@ -120,17 +122,17 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testGetClusterFile() {
+    public void testGetClusterFile() throws MirandaException {
         testGetFileMessage(Cluster.NAME);
     }
 
     @Test
-    public void testGetUsersFile() {
+    public void testGetUsersFile() throws MirandaException {
         testGetFileMessage(UsersFile.FILE_NAME);
     }
 
     @Test
-    public void testProcessVersionsMessage() {
+    public void testProcessVersionsMessage() throws MirandaException {
         Version version = new Version();
         NameVersion nameVersion = new NameVersion("whatever", version);
         List<NameVersion> nameVersionList = new ArrayList<NameVersion>();
@@ -147,7 +149,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testProcessGetFileResonseMessage() {
+    public void testProcessGetFileResonseMessage() throws MirandaException {
         GetFileResponseMessage getFileResponseMessage = new GetFileResponseMessage(null, this, "whatever", "whtever");
         GetFileResponseWireMessage getFileResponseWireMessage = new GetFileResponseWireMessage("whatever", "whatever");
 
@@ -159,7 +161,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testGetVersionsWireMessage() {
+    public void testGetVersionsWireMessage() throws MirandaException {
         setupMockMiranda();
         GetVersionsWireMessage getVersionsWireMessage = new GetVersionsWireMessage();
         NetworkMessage networkMessage = new NetworkMessage(null, this, getVersionsWireMessage);
@@ -173,7 +175,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testProcessVersionsWireMessage() {
+    public void testProcessVersionsWireMessage() throws MirandaException {
         setupMockMiranda();
         setupMockCluster();
         Version version = new Version();
@@ -193,7 +195,7 @@ public class TestNodeReadyState extends TesterNodeState {
         assert (contains(Message.Subjects.Versions, queue));
     }
 
-    public void testProcessGetFileWireMessage(String file) {
+    public void testProcessGetFileWireMessage(String file) throws MirandaException {
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
         setupMockMiranda();
 
@@ -234,7 +236,7 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testProcessGetFileWireMessageCluster() {
+    public void testProcessGetFileWireMessageCluster() throws MirandaException {
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
         setupMockMiranda();
         setupMockCluster();
@@ -246,17 +248,17 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
     @Test
-    public void testProcessGetFileWireMessageUsers() {
+    public void testProcessGetFileWireMessageUsers() throws MirandaException {
         testProcessGetFileWireMessage(UsersFile.FILE_NAME);
     }
 
     @Test
-    public void testProcessGetFileWireMessageTopics() {
+    public void testProcessGetFileWireMessageTopics() throws MirandaException {
         testProcessGetFileWireMessage(TopicsFile.FILE_NAME);
     }
 
     @Test
-    public void testProcessGetFileWireMessageSubscriptions() {
+    public void testProcessGetFileWireMessageSubscriptions() throws MirandaException {
         testProcessGetFileWireMessage(SubscriptionsFile.FILE_NAME);
     }
 
@@ -264,7 +266,7 @@ public class TestNodeReadyState extends TesterNodeState {
     public void testProcessNewSessionWireMessage() throws MirandaException {
         setupMockMiranda();
 
-        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY);
+        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY_PEM);
         User user = userObject.asUser();
 
         Session session = new Session(user, 123, 456);
@@ -283,7 +285,7 @@ public class TestNodeReadyState extends TesterNodeState {
     public void testProcessSessinsExpiredWireMessage() throws MirandaException {
         setupMockMiranda();
 
-        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY);
+        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY_PEM);
         User user = userObject.asUser();
 
         Session session = new Session(user, 123, 456);
@@ -301,13 +303,23 @@ public class TestNodeReadyState extends TesterNodeState {
     }
 
 
-    public static final String TEST_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpjR9MH5cTEPIXR/0cLp/Lw3QDK4RMPIygL8Aqh0yQ/MOpQtXrBzwSph4N1NURg1tB3EuyCVGsTfSfrbR5nqsN5IiaJyBuvhThBLwHyKN+PEUQ/rB6qUyg+jcPigTfqj6gksNxnC6CmCJ6XpBOiBOORgFQvdISo7pOqxZKxmaTqwIDAQAB";
+    public static final String TEST_PUBLIC_KEY_PEM =
+                    "-----BEGIN PUBLIC KEY-----\n" +
+                    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyLhCLtpp7TO6Z+mLHBn5\n" +
+                    "3OnrWH8t/OpLCN1bLuu9B6VJ0005u2w0j5Ex3FsBL4zqRsVcFOqCu/e8GJnLWDhg\n" +
+                    "101AsJf0y50jdlLBihfyspeeRfBFiEoudCAhR+ns8Y90tP8AVhkee0aC6WsAGfGG\n" +
+                    "Q9MR68uQ6+qtmmg2LPU0VDTAx3UOHTuD5W5uWOiL15gCpeI86SRyB9mKavfHSMgS\n" +
+                    "JWW14E5T+3s7X7FOiruF1SIHLwizygwVN4BFycGEx/As2qTYKU72vD++v/spH449\n" +
+                    "uVHV8je0qHO3t60yKOVtTwnZVXx5/JS+uU63Ix0L0CejEHrqlcb7m94uJW2ysztz\n" +
+                    "/QIDAQAB\n" +
+                    "-----END PUBLIC KEY-----\n";
+
 
     @Test
     public void testProcessNewUserWireMessage() throws MirandaException {
         setupMockMiranda();
 
-        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY);
+        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY_PEM);
         User user = userObject.asUser();
         NewUserWireMessage newUserWireMessage = new NewUserWireMessage(userObject);
         NetworkMessage networkMessage = new NetworkMessage(null, this, newUserWireMessage);
@@ -318,14 +330,14 @@ public class TestNodeReadyState extends TesterNodeState {
 
         assert (nextState == getReadyState());
         verify(getMockMiranda(), atLeastOnce()).sendUserAddedMessage(Matchers.any(BlockingQueue.class),
-                Matchers.any(), Matchers.eq(user));
+                Matchers.any(), Matchers.any(User.class));
     }
 
     @Test
-    public void testProcessUpdateUserWireMessage() throws MirandaException {
+    public void testProcessUpdateUserWireMessage() throws Exception {
         setupMockMiranda();
 
-        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY);
+        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY_PEM);
         User user = userObject.asUser();
         UpdateUserWireMessage updateUserWireMessage = new UpdateUserWireMessage(userObject);
         NetworkMessage networkMessage = new NetworkMessage(null, this, updateUserWireMessage);
@@ -336,14 +348,14 @@ public class TestNodeReadyState extends TesterNodeState {
 
         assert (nextState == getReadyState());
         verify(getMockMiranda(), atLeastOnce()).sendUserUpdatedMessage(Matchers.any(BlockingQueue.class),
-                Matchers.any(), Matchers.eq(user));
+                Matchers.any(), Matchers.any(User.class));
     }
 
     @Test
     public void testProcessDeleteUserWireMessage() throws MirandaException {
         setupMockMiranda();
 
-        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY);
+        UserObject userObject = new UserObject("whatever", "Publisher", "whatever", TEST_PUBLIC_KEY_PEM);
         User user = userObject.asUser();
         DeleteUserWireMessage deleteUserWireMessage = new DeleteUserWireMessage("whatever");
         NetworkMessage networkMessage = new NetworkMessage(null, this, deleteUserWireMessage);

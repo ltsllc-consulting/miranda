@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.user;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.clientinterface.MirandaException;
@@ -52,29 +53,20 @@ public class UserManager extends StandardManager<User> {
         return (UsersFile) getFile();
     }
 
-    public UserManager(String filename) throws IOException {
+    public UserManager(String filename) throws IOException, MirandaException {
         super(NAME, filename);
     }
 
-    public State createStartState () {
+    public State createStartState() throws MirandaException {
         return new UserManagerStartState(this);
     }
 
-    public SingleFile<User> createFile (String filename) throws IOException {
+    public SingleFile<User> createFile(String filename) throws IOException, MirandaException {
         return new UsersFile(Miranda.getInstance().getReader(), Miranda.getInstance().getWriter(), filename);
     }
 
-    public void garbageCollectUsers () {
 
-    }
-
-    public void performGarbageCollection () {
-        super.performGarbageCollection();
-
-        garbageCollectUsers();
-    }
-
-    public boolean contains (User user) {
+    public boolean contains(User user) {
         for (User aUser : getUsers())
             if (aUser.equals(user))
                 return true;
@@ -82,21 +74,21 @@ public class UserManager extends StandardManager<User> {
         return false;
     }
 
-    public void addUser (User user) throws DuplicateUserException {
+    public void addUser(User user) throws DuplicateUserException {
         if (contains(user)) {
             throw new DuplicateUserException("The system already contain this user");
         } else {
-            getUsers().add (user);
+            getUsers().add(user);
             getUsersFile().sendNewUserMessage(getQueue(), this, user);
         }
     }
 
-    public void sendGetUser (BlockingQueue<Message> senderQueue, Object sender, String user) {
+    public void sendGetUser(BlockingQueue<Message> senderQueue, Object sender, String user) {
         GetUserMessage getUserMessage = new GetUserMessage(senderQueue, sender, user);
         sendToMe(getUserMessage);
     }
 
-    public User getUser (String name) {
+    public User getUser(String name) {
         for (User user : getUsers()) {
             if (user.getName().equals(name))
                 return user;
@@ -105,7 +97,7 @@ public class UserManager extends StandardManager<User> {
         return null;
     }
 
-    public void deleteUser (String name) {
+    public void deleteUser(String name) {
         User user = getUser(name);
 
         if (user != null) {
@@ -117,31 +109,32 @@ public class UserManager extends StandardManager<User> {
         setData(users);
     }
 
-    public void sendGetUsers (BlockingQueue<Message> senderQueue, Object sender) {
+    public void sendGetUsers(BlockingQueue<Message> senderQueue, Object sender) {
         ListUsersMessage getUsersMessage = new ListUsersMessage(senderQueue, sender);
         sendToMe(getUsersMessage);
     }
 
-    public void sendUpdateUserMessage (BlockingQueue<Message> senderQueue, Object sender, User user) {
-        UpdateUserMessage updateUserMessage = new UpdateUserMessage (senderQueue, sender, null, user);
+    public void sendUpdateUserMessage(BlockingQueue<Message> senderQueue, Object sender, User user) {
+        UpdateUserMessage updateUserMessage = new UpdateUserMessage(senderQueue, sender, null, user);
         sendToMe(updateUserMessage);
     }
 
-    public void sendDeleteUserMessage (BlockingQueue<Message> senderQueue, Object sender, String name) {
-        DeleteUserMessage deleteUserMessage = new DeleteUserMessage (senderQueue, sender, null, name);
+    public void sendDeleteUserMessage(BlockingQueue<Message> senderQueue, Object sender, String name) {
+        DeleteUserMessage deleteUserMessage = new DeleteUserMessage(senderQueue, sender, null, name);
         sendToMe(deleteUserMessage);
     }
 
-    public void updateUser (UserObject userObject) throws MirandaException {
+    public void updateUser(UserObject userObject) throws MirandaException, IOException {
         User existingUser = getUser(userObject.getName());
 
         if (null == existingUser)
-            throw new UnknownUserException ("User " + userObject.getName() + " not found");
+            throw new UnknownUserException("User " + userObject.getName() + " not found");
 
-        existingUser.merge (userObject);
+        User user = userObject.asUser();
+        existingUser.merge(user);
     }
 
-    public void updateUser (User user) throws UnknownUserException, MergeException {
+    public void updateUser(User user) throws UnknownUserException, MergeException, IOException {
         User existingUser = getUser(user.getName());
 
         if (null == existingUser) {
@@ -151,32 +144,34 @@ public class UserManager extends StandardManager<User> {
         }
     }
 
-    public void sendGetUserMessage (BlockingQueue<Message> senderQueue, Object sender, String name) {
+    public void sendGetUserMessage(BlockingQueue<Message> senderQueue, Object sender, String name)
+            throws EncryptionException
+    {
         GetUserMessage getUserMessage = new GetUserMessage(senderQueue, sender, name);
         sendToMe(getUserMessage);
     }
 
-    public void sendUserAddedMessage (BlockingQueue<Message> senderQueue, Object sender, User user) {
+    public void sendUserAddedMessage(BlockingQueue<Message> senderQueue, Object sender, User user) {
         UserAddedMessage userAddedMessage = new UserAddedMessage(senderQueue, sender, user);
         sendToMe(userAddedMessage);
     }
 
-    public void sendUserUpdatedMessage (BlockingQueue<Message> senderQueue, Object sender, User user) {
+    public void sendUserUpdatedMessage(BlockingQueue<Message> senderQueue, Object sender, User user) {
         UserUpdatedMessage userUpdatedMessage = new UserUpdatedMessage(senderQueue, sender, user);
         sendToMe(userUpdatedMessage);
     }
 
-    public void sendUserDeletedMessage (BlockingQueue<Message> senderQueue, Object sender, String name) {
+    public void sendUserDeletedMessage(BlockingQueue<Message> senderQueue, Object sender, String name) {
         UserDeletedMessage userDeletedMessage = new UserDeletedMessage(senderQueue, sender, name);
         sendToMe(userDeletedMessage);
     }
 
-    public void sendCreateUserMessage (BlockingQueue<Message> senderQueue, Object sender, User user) {
+    public void sendCreateUserMessage(BlockingQueue<Message> senderQueue, Object sender, User user) {
         CreateUserMessage createUserMessage = new CreateUserMessage(senderQueue, sender, null, user);
         sendToMe(createUserMessage);
     }
 
-    public User convert (User user) {
+    public User convert(User user) {
         return user;
     }
 }

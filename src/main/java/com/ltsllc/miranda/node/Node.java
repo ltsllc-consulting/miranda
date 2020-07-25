@@ -19,6 +19,7 @@ package com.ltsllc.miranda.node;
 import com.ltsllc.miranda.Consumer;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 import com.ltsllc.miranda.clientinterface.objects.NodeStatus;
 import com.ltsllc.miranda.cluster.Cluster;
@@ -36,9 +37,8 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Clark on 12/31/2016.
  */
-public class Node extends Consumer
-{
-    public Node(NodeElement element, Network network, Cluster cluster) {
+public class Node extends Consumer {
+    public Node(NodeElement element, Network network, Cluster cluster) throws MirandaException {
         super("node");
         dns = element.getDns();
         port = element.getPort();
@@ -55,7 +55,7 @@ public class Node extends Consumer
      *
      * @param handle
      */
-    public Node (int handle, Network network, Cluster cluster) {
+    public Node(int handle, Network network, Cluster cluster) throws MirandaException {
         super("node");
 
         this.handle = handle;
@@ -81,7 +81,7 @@ public class Node extends Consumer
         return dns;
     }
 
-    public void setDns (String dns) {
+    public void setDns(String dns) {
         this.dns = dns;
     }
 
@@ -113,19 +113,19 @@ public class Node extends Consumer
         return handle;
     }
 
-    public void setHandle (int handle) {
+    public void setHandle(int handle) {
         this.handle = handle;
     }
 
-    public boolean equalsElement (NodeElement nodeElement) {
+    public boolean equalsElement(NodeElement nodeElement) {
         if (null == getDns())
             return false;
 
         return getDns().equals(nodeElement.getDns()) && getPort() == nodeElement.getPort();
     }
 
-    public void connect () {
-        getNetwork().sendConnect (getQueue(), this, getDns(), getPort());
+    public void connect() {
+        getNetwork().sendConnect(getQueue(), this, getDns(), getPort());
     }
 
     public void sendOnWire(WireMessage wireMessage) {
@@ -138,7 +138,7 @@ public class Node extends Consumer
     }
 
 
-    public NodeElement getUpdatedElement () {
+    public NodeElement getUpdatedElement() {
         NodeElement nodeElement = new NodeElement(getDns(), getPort(), getDescription());
         Date date = new Date();
         nodeElement.setLastConnected(date.getTime());
@@ -156,14 +156,12 @@ public class Node extends Consumer
     }
 
 
-    public boolean matches (NodeElement nodeElement) {
-        return (
-                getDns().equals(nodeElement.getDns())
-                        && getPort() == nodeElement.getPort()
-        );
+    public boolean matches(NodeElement nodeElement) {
+        return getDns().equals(nodeElement.getDns()) && getPort() == nodeElement.getPort();
+
     }
 
-    public NodeElement asNodeElement () {
+    public NodeElement asNodeElement() {
         NodeElement nodeElement = new NodeElement(getDns(), getPort(), getDescription());
 
         if (isConnected()) {
@@ -173,19 +171,39 @@ public class Node extends Consumer
         return nodeElement;
     }
 
-    public NodeStatus getStatus () {
+    public NodeStatus getStatus() {
         NodeStatus.NodeStatuses status = isConnected() ? NodeStatus.NodeStatuses.Online : NodeStatus.NodeStatuses.Offline;
         NodeStatus nodeStatus = new NodeStatus(getDns(), getPort(), getDescription(), status);
         return nodeStatus;
     }
 
-    public void stop () {
+    public void stop() {
         StopWireMessage stopWireMessage = new StopWireMessage();
         getNetwork().sendNetworkMessage(getQueue(), this, getHandle(), stopWireMessage);
     }
 
-    public void sendSendNetworkMessage (BlockingQueue<Message> senderQueue, Object sender, WireMessage wireMessage) {
+    public void sendSendNetworkMessage(BlockingQueue<Message> senderQueue, Object sender, WireMessage wireMessage) {
         SendNetworkMessage sendNetworkMessage = new SendNetworkMessage(senderQueue, sender, wireMessage, getHandle());
         sendToMe(sendNetworkMessage);
+    }
+
+    public void disconnect() {
+        if (isConnected()) {
+            getNetwork().sendClose(getQueue(), this, getHandle());
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Node { ");
+        stringBuilder.append(getDns());
+        stringBuilder.append(", ");
+        stringBuilder.append(getPort());
+        stringBuilder.append(", ");
+        stringBuilder.append(getHandle());
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
     }
 }

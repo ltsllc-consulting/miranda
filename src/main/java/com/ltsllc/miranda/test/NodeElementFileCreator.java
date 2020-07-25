@@ -17,8 +17,8 @@
 package com.ltsllc.miranda.test;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 
 import java.io.File;
@@ -43,12 +43,12 @@ public class NodeElementFileCreator implements FileCreator {
         return maxNumberOfNodes;
     }
 
-    public NodeElementFileCreator (ImprovedRandom random, int maxNumberOfNodes) {
+    public NodeElementFileCreator(ImprovedRandom random, int maxNumberOfNodes) {
         this.random = random;
         this.maxNumberOfNodes = maxNumberOfNodes;
     }
 
-    public boolean createFile (File file) {
+    public boolean createFile(File file) {
         int numberOfNodes = 1 + getRandom().nextInt(getMaxNumberOfNodes());
         List<NodeElement> nodeElementList = new ArrayList<NodeElement>();
         for (int i = 0; i < numberOfNodes; i++) {

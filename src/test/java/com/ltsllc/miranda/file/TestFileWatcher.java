@@ -17,12 +17,15 @@
 package com.ltsllc.miranda.file;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.test.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -40,51 +43,58 @@ public class TestFileWatcher extends TestCase {
             {"old/whatever", "random file"},
     };
 
-    private FileWatcher fileWatcher;
-    private BlockingQueue<Message> queue;
+    public static final String TEST_DIRECTORY = "testdir";
+    public static final String TEST_FILENAME = "testdir/whatever";
 
-    public FileWatcher getFileWatcher() {
-        return fileWatcher;
-    }
 
-    public BlockingQueue<Message> getQueue() {
-        return queue;
-    }
 
-    public void reset () {
-        super.reset();
 
-        fileWatcher = null;
-        queue = null;
-    }
 
     @Before
     public void setup () {
-        reset();
+        try {
+            reset();
 
-        super.setup();
+            super.setup();
 
-        setupMirandaProperties();
+            setupMirandaProperties();
+            createFileSystem(ROOT, FILE_SYSTEM_SPEC);
 
-        createFileSystem(ROOT, FILE_SYSTEM_SPEC);
-
-        queue = new LinkedBlockingQueue<Message>();
-        File file = new File("testdir/new/20170220-001.msg");
-
-        fileWatcher = new FileWatcher(queue);
+            createDirectory(TEST_DIRECTORY);
+            createFile(TEST_FILENAME);
+            setupFileWatcherService(100);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @After
     public void cleanup () {
+
         deleteDirectory(ROOT);
     }
 
     @Test
-    public void testSend () {
-        getFileWatcher().sendMessage("whatever");
+    public void testCheck () throws Exception {
+        BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
+        File file = new File(TEST_FILENAME);
+        Miranda.fileWatcher.watchFile(file, queue);
 
-        pause(125);
+        assert (queueIsEmpty(queue));
 
-        assert (contains(Message.Subjects.FileChanged, getQueue()));
+        pause(500);
+
+        touch(file);
+
+        Miranda.fileWatcher.check();
+
+        pause(1000);
+
+        int x = 13;
+        long filetime = file.lastModified();
+        if (!contains(Message.Subjects.FileChanged, queue))
+            x++;
+
+        assert (contains(Message.Subjects.FileChanged, queue));
     }
 }

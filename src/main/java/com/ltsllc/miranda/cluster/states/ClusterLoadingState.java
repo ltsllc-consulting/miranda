@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.cluster.states;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.cluster.Cluster;
 import com.ltsllc.miranda.manager.ManagerLoadingState;
 
@@ -24,15 +25,15 @@ import com.ltsllc.miranda.manager.ManagerLoadingState;
  * Created by Clark on 5/14/2017.
  */
 public class ClusterLoadingState extends ManagerLoadingState {
-    public Cluster getCluster () {
+    public Cluster getCluster() {
         return (Cluster) getContainer();
     }
 
-    public ClusterLoadingState (Cluster cluster) {
+    public ClusterLoadingState(Cluster cluster) throws MirandaException {
         super(cluster);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new ClusterReadyState(getCluster());
     }
 }

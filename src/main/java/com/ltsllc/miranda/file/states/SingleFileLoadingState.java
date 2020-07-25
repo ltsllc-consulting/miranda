@@ -19,6 +19,7 @@ package com.ltsllc.miranda.file.states;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.SingleFile;
 import com.ltsllc.miranda.file.messages.FileChangedMessage;
 import com.ltsllc.miranda.miranda.Miranda;
@@ -28,21 +29,21 @@ import com.ltsllc.miranda.reader.ReadResponseMessage;
  * Created by Clark on 5/14/2017.
  */
 abstract public class SingleFileLoadingState extends State {
-    abstract public State getReadyState();
+    abstract public State getReadyState() throws MirandaException;
 
     public SingleFile getSingleFile() {
         return (SingleFile) getContainer();
     }
 
-    public SingleFileLoadingState(SingleFile singleFile) {
+    public SingleFileLoadingState(SingleFile singleFile) throws MirandaException {
         super(singleFile);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getSingleFile().getCurrentState();
 
         switch (message.getSubject()) {
-            case ReadResponse : {
+            case ReadResponse: {
                 ReadResponseMessage readResponseMessage = (ReadResponseMessage) message;
                 nextState = processReadResponseMessage(readResponseMessage);
                 break;
@@ -50,7 +51,7 @@ abstract public class SingleFileLoadingState extends State {
 
             case FileChanged: {
                 FileChangedMessage fileChangedMessage = (FileChangedMessage) message;
-                nextState = processFileChangedMessage (fileChangedMessage);
+                nextState = processFileChangedMessage(fileChangedMessage);
                 break;
             }
             default: {
@@ -62,14 +63,14 @@ abstract public class SingleFileLoadingState extends State {
         return nextState;
     }
 
-    public State processReadResponseMessage (ReadResponseMessage readResponseMessage) {
+    public State processReadResponseMessage(ReadResponseMessage readResponseMessage) throws MirandaException {
         State nextState = getSingleFile().getCurrentState();
 
         if (readResponseMessage.getResult() == ReadResponseMessage.Results.Success) {
             getSingleFile().processData(readResponseMessage.getData());
             nextState = getReadyState();
-        } else if (readResponseMessage.getResult() == ReadResponseMessage.Results.ExceptionReadingFile){
-            Panic panic = new Panic ("Error trying to load file", readResponseMessage.getException(), Panic.Reasons.ErrorLoadingFile);
+        } else if (readResponseMessage.getResult() == ReadResponseMessage.Results.ExceptionReadingFile) {
+            Panic panic = new Panic("Error trying to load file", readResponseMessage.getException(), Panic.Reasons.ErrorLoadingFile);
             Miranda.getInstance().panic(panic);
         } else {
             Panic panic = new Panic("Unrecogized result from reading " + readResponseMessage.getFilename(), Panic.Reasons.UnrecognizedResult);
@@ -79,7 +80,7 @@ abstract public class SingleFileLoadingState extends State {
         return nextState;
     }
 
-    public State processFileChangedMessage (FileChangedMessage fileChangedMessage) {
+    public State processFileChangedMessage(FileChangedMessage fileChangedMessage) {
         getSingleFile().getReader().sendReadMessage(getSingleFile().getQueue(), this, getSingleFile().getFilename());
 
         return getSingleFile().getCurrentState();

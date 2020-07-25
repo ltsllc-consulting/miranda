@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.event;
 
 import com.google.gson.reflect.TypeToken;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.file.states.SingleFileReadyState;
 
@@ -29,15 +30,16 @@ import java.util.List;
 public class EventsFileReadyState extends SingleFileReadyState<Event> {
     public static final String NAME = "events file";
 
-    public Type getListType () {
-        return new TypeToken<List<Event>>(){}.getType();
+    public Type getListType() {
+        return new TypeToken<List<Event>>() {
+        }.getType();
     }
 
-    public String getName () {
+    public String getName() {
         return NAME;
     }
 
-    public EventsFileReadyState (EventsFile eventsFile) {
+    public EventsFileReadyState(EventsFile eventsFile) throws MirandaException {
         super(eventsFile);
     }
 }

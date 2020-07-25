@@ -17,14 +17,15 @@
 package com.ltsllc.miranda.writer;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.clcl.EncryptedMessage;
+import com.ltsllc.clcl.EncryptionException;
+import com.ltsllc.clcl.PublicKey;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Consumer;
-import com.ltsllc.miranda.EncryptedMessage;
 import com.ltsllc.miranda.Message;
-import com.ltsllc.miranda.clientinterface.basicclasses.PublicKey;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 
 import java.io.*;
-import java.security.GeneralSecurityException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -41,7 +42,7 @@ public class Writer extends Consumer {
     }
 
 
-    public Writer (PublicKey publicKey) {
+    public Writer(PublicKey publicKey) throws MirandaException {
         super("writer");
         BlockingQueue<Message> queue = new LinkedBlockingQueue<Message>();
         setQueue(queue);
@@ -52,17 +53,16 @@ public class Writer extends Consumer {
         this.publicKey = publicKey;
     }
 
-    public void write (String filename, byte[] data) throws IOException, GeneralSecurityException {
+    public void write(String filename, byte[] clearText) throws IOException, EncryptionException {
         File file = new File(filename);
 
         if (file.exists())
             backup(file);
 
-        EncryptedMessage encryptedMessage = encrypt(data);
-
         FileWriter fileWriter = null;
 
         try {
+            EncryptedMessage encryptedMessage = encrypt(clearText);
             fileWriter = new FileWriter(filename);
             String json = gson.toJson(encryptedMessage);
             fileWriter.write(json);
@@ -73,7 +73,7 @@ public class Writer extends Consumer {
 
     private static final int BUFFER_SIZE = 8192;
 
-    public void copyFile (String srcFileName, String destFileName) throws IOException {
+    public void copyFile(String srcFileName, String destFileName) throws IOException {
         FileInputStream fileInputStream = null;
         FileOutputStream fileOutputStream = null;
         byte[] buffer = new byte[BUFFER_SIZE];
@@ -93,14 +93,13 @@ public class Writer extends Consumer {
         }
     }
 
-    public void backup (File file) throws IOException
-    {
+    public void backup(File file) throws IOException {
         byte[] buffer = new byte[BUFFER_SIZE];
 
         File backup = new File(file.getCanonicalPath() + ".backup");
         if (backup.exists()) {
             if (!backup.delete()) {
-                throw new IOException ("Could not remove backup file: " + backup);
+                throw new IOException("Could not remove backup file: " + backup);
             }
         }
 
@@ -110,12 +109,12 @@ public class Writer extends Consumer {
         copyFile(filename, backupFilename);
     }
 
-    public void sendWrite (BlockingQueue<Message> senderQueue, Object sender, String filename, byte[] data) {
+    public void sendWrite(BlockingQueue<Message> senderQueue, Object sender, String filename, byte[] data) {
         WriteMessage writeMessage = new WriteMessage(filename, data, senderQueue, sender);
         sendToMe(writeMessage);
     }
 
-    public EncryptedMessage encrypt (byte[] plaintext) throws GeneralSecurityException, IOException {
-        return getPublicKey().encrypt(plaintext);
+    public EncryptedMessage encrypt(byte[] plaintext) throws EncryptionException {
+        return getPublicKey().encryptToMessage(plaintext);
     }
 }

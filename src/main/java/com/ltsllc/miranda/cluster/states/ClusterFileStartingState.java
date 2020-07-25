@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.cluster.states;
 
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.cluster.ClusterFile;
 import com.ltsllc.miranda.file.states.SingleFileStartingState;
 
@@ -24,15 +25,15 @@ import com.ltsllc.miranda.file.states.SingleFileStartingState;
  * Created by Clark on 5/18/2017.
  */
 public class ClusterFileStartingState extends SingleFileStartingState {
-    public ClusterFile getClusterFile () {
+    public ClusterFile getClusterFile() {
         return (ClusterFile) getContainer();
     }
 
-    public ClusterFileStartingState (ClusterFile clusterFile) {
+    public ClusterFileStartingState(ClusterFile clusterFile) throws MirandaException {
         super(clusterFile);
     }
 
-    public State getReadyState () {
+    public State getReadyState() throws MirandaException {
         return new ClusterFileReadyState(getClusterFile());
     }
 }

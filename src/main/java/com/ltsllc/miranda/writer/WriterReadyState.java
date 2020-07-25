@@ -16,26 +16,26 @@
 
 package com.ltsllc.miranda.writer;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * Created by Clark on 1/3/2017.
  */
 public class WriterReadyState extends State {
-    public Writer getWriter () {
+    public Writer getWriter() {
         return (Writer) getContainer();
     }
 
-    public WriterReadyState(Writer writer) {
+    public WriterReadyState(Writer writer) throws MirandaException {
         super(writer);
     }
 
-    public State processMessage (Message m)
-    {
+    public State processMessage(Message m) throws MirandaException {
         State nextState = this;
 
         switch (m.getSubject()) {
@@ -54,12 +54,12 @@ public class WriterReadyState extends State {
         return nextState;
     }
 
-    private State processWriteMessage (WriteMessage writeMessage) {
-        try{
+    private State processWriteMessage(WriteMessage writeMessage) throws MirandaException {
+        try {
             getWriter().write(writeMessage.getFilename(), writeMessage.getBuffer());
             WriteSucceededMessage writeSucceededMessage = new WriteSucceededMessage(getWriter().getQueue(), writeMessage.getFilename(), this);
             writeMessage.reply(writeSucceededMessage);
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException | EncryptionException e) {
             WriteFailedMessage writeFailedMessage = new WriteFailedMessage(getWriter().getQueue(), writeMessage.getFilename(), e, this);
             writeMessage.reply(writeFailedMessage);
         }

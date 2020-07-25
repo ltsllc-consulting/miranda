@@ -19,6 +19,7 @@ package com.ltsllc.miranda.operations.topic;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.StopState;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.topics.messages.DeleteTopicResponseMessage;
 
@@ -26,15 +27,15 @@ import com.ltsllc.miranda.topics.messages.DeleteTopicResponseMessage;
  * Created by Clark on 4/23/2017.
  */
 public class DeleteTopicOperationReadyState extends State {
-    public DeleteTopicOperation getDeleteTopicOperation () {
+    public DeleteTopicOperation getDeleteTopicOperation() {
         return (DeleteTopicOperation) getContainer();
     }
 
-    public DeleteTopicOperationReadyState (DeleteTopicOperation deleteTopicOperation) {
+    public DeleteTopicOperationReadyState(DeleteTopicOperation deleteTopicOperation) throws MirandaException {
         super(deleteTopicOperation);
     }
 
-    public State processMessage (Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = getDeleteTopicOperation().getCurrentState();
 
         switch (message.getSubject()) {
@@ -62,7 +63,7 @@ public class DeleteTopicOperationReadyState extends State {
         return StopState.getInstance();
     }
 
-    public State start () {
+    public State start() {
         super.start();
 
         Miranda.getInstance().getTopicManager().sendDeleteTopicMessage(getDeleteTopicOperation().getQueue(), this,

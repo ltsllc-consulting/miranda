@@ -18,6 +18,7 @@ package com.ltsllc.miranda.http;
 
 import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.StartupPanic;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.servlet.catchall.CatchallServlet;
 import org.apache.log4j.Logger;
@@ -34,10 +35,9 @@ public class JettyHttpServer extends HttpServer {
     private static HandlerCollection ourHandlerCollection;
     private static ServletHandler ourServletHandler;
     private static Logger logger = Logger.getLogger(JettyHttpServer.class);
-
     private Server jetty;
 
-    public JettyHttpServer (Server jetty, HandlerCollection handlerCollection) {
+    public JettyHttpServer(Server jetty, HandlerCollection handlerCollection) throws MirandaException {
         super();
 
         this.jetty = jetty;
@@ -45,16 +45,15 @@ public class JettyHttpServer extends HttpServer {
     }
 
 
-
     public static ServletHandler getServletHandler() {
         return ourServletHandler;
     }
 
-    public static HandlerCollection getHandlerCollection () {
+    public static HandlerCollection getHandlerCollection() {
         return ourHandlerCollection;
     }
 
-    public Server getJetty () {
+    public Server getJetty() {
         return jetty;
     }
 
@@ -81,7 +80,7 @@ public class JettyHttpServer extends HttpServer {
             logger.info("Jetty started");
             org.bouncycastle.asn1.x509.AlgorithmIdentifier algorithmIdentifier;
         } catch (Exception e) {
-            Panic panic = new StartupPanic("Excepion trying to start HttpServer", e, StartupPanic.StartupReasons.ExceptionStartingHttpServer);
+            Panic panic = new StartupPanic("Excepion trying to start HttpServer", e, StartupPanic.StartupReasons.ExceptionStartingServletContainer);
             Miranda.getInstance().panic(panic);
         }
     }

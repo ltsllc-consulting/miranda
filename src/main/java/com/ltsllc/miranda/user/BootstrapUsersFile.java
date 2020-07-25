@@ -2,10 +2,11 @@ package com.ltsllc.miranda.user;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.ltsllc.common.util.Utils;
-import com.ltsllc.miranda.EncryptedMessage;
-import com.ltsllc.miranda.clientinterface.basicclasses.PrivateKey;
-import com.ltsllc.miranda.clientinterface.basicclasses.PublicKey;
+import com.ltsllc.clcl.EncryptedMessage;
+import com.ltsllc.clcl.EncryptionException;
+import com.ltsllc.clcl.PrivateKey;
+import com.ltsllc.clcl.PublicKey;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 
 import java.io.File;
@@ -44,16 +45,22 @@ public class BootstrapUsersFile {
         this.privateKey = privateKey;
     }
 
-    public BootstrapUsersFile (String usersFilename, String keyStoreFilename, String password) throws IOException, GeneralSecurityException {
+    public BootstrapUsersFile(String usersFilename, String keyStoreFilename, String password) throws IOException, GeneralSecurityException {
         initialize(usersFilename, keyStoreFilename, password);
     }
 
-    public void initialize (String usersFilename, String keyStoreFilename, String password) throws IOException, GeneralSecurityException {
+    public void initialize(String usersFilename, String keyStoreFilename, String password) throws IOException, GeneralSecurityException {
         KeyStore keyStore = Utils.loadKeyStore(keyStoreFilename, password);
+
+        java.security.PrivateKey jsPrivateKey = (java.security.PrivateKey) keyStore.getKey("private", password.toCharArray());
+        PrivateKey privateKey = new PrivateKey(jsPrivateKey);
+        setPrivateKey(privateKey);
+
         Certificate certificate = keyStore.getCertificate("private");
         java.security.PublicKey jsPublicKey = certificate.getPublicKey();
         PublicKey publicKey = new PublicKey(jsPublicKey);
-        setPublicKey (publicKey);
+        setPublicKey(publicKey);
+
         this.filename = usersFilename;
         this.userList = new ArrayList<User>();
     }
@@ -70,11 +77,11 @@ public class BootstrapUsersFile {
         this.publicKey = publicKey;
     }
 
-    public void create (User user) {
+    public void create(User user) {
         userList.add(user);
     }
 
-    public void read () throws IOException, GeneralSecurityException {
+    public void read() throws IOException, EncryptionException {
         File file = new File(getFilename());
         if (!file.exists())
             return;
@@ -85,7 +92,7 @@ public class BootstrapUsersFile {
             Gson gson = new Gson();
             fileReader = new FileReader(getFilename());
             EncryptedMessage encryptedMessage = gson.fromJson(fileReader, EncryptedMessage.class);
-            byte[] plainText = getPrivateKey().decrypt(encryptedMessage);
+            byte[] plainText = getPrivateKey().decryptFromMessage(encryptedMessage);
             String json = new String(plainText);
             Type t = new TypeToken<List<User>>() {
             }.getType();
@@ -95,13 +102,13 @@ public class BootstrapUsersFile {
         }
     }
 
-    public void write () throws IOException, GeneralSecurityException {
+    public void write() throws IOException, EncryptionException {
         FileWriter fileWriter = null;
 
         try {
             String json = gson.toJson(userList);
             fileWriter = new FileWriter(getFilename());
-            EncryptedMessage encryptedMessage = getPublicKey().encrypt(json.getBytes());
+            EncryptedMessage encryptedMessage = getPublicKey().encryptToMessage(json.getBytes());
             json = gson.toJson(encryptedMessage);
             fileWriter.write(json);
         } finally {
@@ -109,7 +116,7 @@ public class BootstrapUsersFile {
         }
     }
 
-    public void createUser (String name, String description) throws GeneralSecurityException, IOException {
+    public void createUser(String name, String description) throws GeneralSecurityException, IOException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
         PublicKey publicKey = new PublicKey(keyPair.getPublic());
@@ -118,6 +125,6 @@ public class BootstrapUsersFile {
         String privateKeyFilename = name + ".private.pem.txt";
         Utils.writeAsPem(publicKeyFilename, keyPair.getPublic());
         Utils.writeAsPem(privateKeyFilename, keyPair.getPrivate());
-        userList.add (user);
+        userList.add(user);
     }
 }

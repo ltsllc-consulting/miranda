@@ -17,32 +17,29 @@
 package com.ltsllc.miranda.file.states;
 
 import com.ltsllc.miranda.Message;
-import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.State;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.file.MirandaFile;
 import com.ltsllc.miranda.file.messages.FileChangedMessage;
-import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.miranda.messages.GarbageCollectionMessage;
 import com.ltsllc.miranda.node.NameVersion;
 import com.ltsllc.miranda.node.messages.GetVersionMessage;
 import com.ltsllc.miranda.node.messages.VersionMessage;
 
-import java.io.IOException;
-
 /**
  * Created by Clark on 2/26/2017.
  */
 public class MirandaFileReadyState extends State {
-    public MirandaFileReadyState (MirandaFile file) {
+    public MirandaFileReadyState(MirandaFile file) throws MirandaException {
         super(file);
     }
 
-    public MirandaFile getMirandaFile () {
+    public MirandaFile getMirandaFile() {
         return (MirandaFile) getContainer();
     }
 
     @Override
-    public State processMessage(Message message) {
+    public State processMessage(Message message) throws MirandaException {
         State nextState = this;
 
         switch (message.getSubject()) {
@@ -64,6 +61,10 @@ public class MirandaFileReadyState extends State {
                 break;
             }
 
+            case GetFile: {
+
+            }
+
             default: {
                 nextState = super.processMessage(message);
                 break;
@@ -73,34 +74,25 @@ public class MirandaFileReadyState extends State {
         return nextState;
     }
 
-    public void fireFileLoaded () {}
+    public void fireFileLoaded() {
+    }
 
-    public State processFileChangedMessage (FileChangedMessage fileChangedMessage) {
-        try {
-            getMirandaFile().load();
-        } catch (IOException e) {
-            Panic panic = new Panic("Exception loading file", e, Panic.Reasons.ExceptionLoadingFile);
-            Miranda.panicMiranda(panic);
-        }
-
-        fireFileLoaded();
+    public State processFileChangedMessage(FileChangedMessage fileChangedMessage) {
+        getMirandaFile().load();
 
         return getMirandaFile().getCurrentState();
     }
 
-    private State processGarbageCollectionMessage (GarbageCollectionMessage garbageCollectionMessage) {
+    private State processGarbageCollectionMessage(GarbageCollectionMessage garbageCollectionMessage) {
         getMirandaFile().performGarbageCollection();
         return this;
     }
 
-    private State processGetVersionMessage (GetVersionMessage getVersionMessage) {
+    private State processGetVersionMessage(GetVersionMessage getVersionMessage) {
         NameVersion nameVersion = new NameVersion(getMirandaFile().getName(), getMirandaFile().getVersion());
         VersionMessage versionMessage = new VersionMessage(getMirandaFile().getQueue(), this, nameVersion);
         send(getVersionMessage.getRequester(), versionMessage);
 
         return getMirandaFile().getCurrentState();
     }
-
-
-
 }

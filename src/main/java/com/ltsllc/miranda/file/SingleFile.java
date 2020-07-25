@@ -18,16 +18,16 @@ package com.ltsllc.miranda.file;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.Version;
-import com.ltsllc.miranda.clientinterface.basicclasses.Matchable;
 import com.ltsllc.miranda.clientinterface.basicclasses.MergeException;
 import com.ltsllc.miranda.clientinterface.basicclasses.MirandaObject;
 import com.ltsllc.miranda.cluster.messages.LoadMessage;
 import com.ltsllc.miranda.deliveries.Comparer;
 import com.ltsllc.miranda.file.messages.AddObjectsMessage;
+import com.ltsllc.miranda.file.messages.FileChangedMessage;
 import com.ltsllc.miranda.file.messages.RemoveObjectsMessage;
 import com.ltsllc.miranda.file.messages.UpdateObjectsMessage;
 import com.ltsllc.miranda.miranda.Miranda;
@@ -47,9 +47,11 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Clark on 1/10/2017.
  */
-abstract public class SingleFile<E extends MirandaObject & Matchable> extends MirandaFile implements Comparer {
+abstract public class SingleFile<E extends MirandaObject> extends MirandaFile implements Comparer {
     abstract public List buildEmptyList();
+
     abstract public Type getListType();
+
     abstract public void checkForDuplicates();
 
     private static Logger logger = Logger.getLogger(SingleFile.class);
@@ -58,7 +60,8 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
             .setPrettyPrinting()
             .create();
 
-    protected SingleFile () {}
+    protected SingleFile() {
+    }
 
     public SingleFile(String filename, Reader reader, com.ltsllc.miranda.writer.Writer writer) throws IOException {
         super(filename, reader, writer);
@@ -76,7 +79,7 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
         this.data = list;
     }
 
-    public void setData (byte[] data) {
+    public void setData(byte[] data) {
         if (null == data) {
             this.data = new ArrayList();
         } else {
@@ -145,7 +148,7 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
     public boolean contains(Object o) {
         E e = (E) o;
         for (E contained : getData()) {
-            if (contained.matches(e))
+            if (contained.isEquivalentTo(e))
                 return true;
         }
 
@@ -206,17 +209,39 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
         sendToMe(loadMessage);
     }
 
-    public void merge(List<E> list) {
+    public boolean merge(List list)
+            throws IOException
+    {
         List<E> newItems = new ArrayList<E>();
+        boolean changed = false;
 
-        for (E e : list) {
-            if (!contains(e))
+        for (Object o : list) {
+            E mergeable = (E) o;
+
+            MirandaObject existing = find(mergeable);
+
+            if (null == existing) {
+                E e = (E) mergeable;
                 newItems.add(e);
+                changed = true;
+            } else {
+                boolean temp = existing.merge(mergeable);
+                if (!(changed))
+                    changed = temp;
+            }
         }
 
         if (newItems.size() > 0) {
             getData().addAll(newItems);
         }
+
+        if (changed) {
+            updateVersion();
+            write();
+            fireFileChanged();
+        }
+
+        return changed;
     }
 
     public void addSubscriber(BlockingQueue<Message> subscriberQueue) {
@@ -277,7 +302,7 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
         write();
     }
 
-    public void updateObjects(List<E> updatedObjects) throws MergeException {
+    public void updateObjects(List<E> updatedObjects) throws MergeException,IOException {
         for (E updatedObject : updatedObjects) {
             update(updatedObject);
         }
@@ -287,21 +312,19 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
         write();
     }
 
-    public void update(E updatedObject) throws MergeException {
-        E existingObject = find(updatedObject);
+    public void update(E updatedObject) throws MergeException,IOException {
+        E existingObject = (E) find(updatedObject);
 
         if (null == existingObject) {
             logger.error("Could not find match for update");
         } else {
             existingObject.merge(updatedObject);
         }
-
-        write();
     }
 
     public E findMatch(E object) {
         for (E candidate : getData()) {
-            if (object.matches(candidate))
+            if (object.isEquivalentTo(candidate))
                 return candidate;
         }
 
@@ -326,12 +349,17 @@ abstract public class SingleFile<E extends MirandaObject & Matchable> extends Mi
         write();
     }
 
-    public E find(E object) {
-        for (E candidate : getData()) {
-            if (candidate.matches(object))
+    public MirandaObject find(MirandaObject object) {
+        for (MirandaObject candidate : getData()) {
+            if (candidate.isEquivalentTo(object))
                 return candidate;
         }
 
         return null;
+    }
+
+    public void fireFileChanged() {
+        FileChangedMessage fileChangedMessage = new FileChangedMessage(getQueue(), this, null);
+        fireMessage(fileChangedMessage);
     }
 }

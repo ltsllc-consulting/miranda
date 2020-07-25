@@ -16,19 +16,19 @@
 
 package com.ltsllc.miranda.manager;
 
-import com.ltsllc.miranda.clientinterface.basicclasses.Matchable;
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.clientinterface.basicclasses.Equivalent;
 import com.ltsllc.miranda.clientinterface.basicclasses.MirandaObject;
-import com.ltsllc.miranda.file.Updateable;
 
 /**
  * Created by Clark on 5/18/2017.
  */
-public class StandardManagerReadyState<E extends MirandaObject & Matchable> extends ManagerReadyState<E, E> {
-    public StandardManager<E> getManager () {
+public class StandardManagerReadyState<E extends MirandaObject & Equivalent> extends ManagerReadyState<E, E> {
+    public StandardManager<E> getManager() {
         return (StandardManager) getContainer();
     }
 
-    public StandardManagerReadyState (StandardManager manager) {
+    public StandardManagerReadyState(StandardManager manager) throws MirandaException {
         super(manager);
     }
 }

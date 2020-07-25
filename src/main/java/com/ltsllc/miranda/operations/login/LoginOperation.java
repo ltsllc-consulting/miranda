@@ -18,6 +18,7 @@ package com.ltsllc.miranda.operations.login;
 
 import com.ltsllc.miranda.Consumer;
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 
 import java.util.concurrent.BlockingQueue;
@@ -39,8 +40,8 @@ public class LoginOperation extends Consumer {
         return requester;
     }
 
-    public LoginOperation (String name, BlockingQueue<Message> requester) {
-        super (NAME);
+    public LoginOperation(String name, BlockingQueue<Message> requester) throws MirandaException {
+        super(NAME);
 
         this.requester = requester;
         this.user = name;
@@ -49,7 +50,7 @@ public class LoginOperation extends Consumer {
         setCurrentState(readyState);
     }
 
-    public void start () {
+    public void start() {
         super.start();
 
         Miranda.getInstance().getSessionManager().sendGetSessionMessage(getQueue(), this, getUser());

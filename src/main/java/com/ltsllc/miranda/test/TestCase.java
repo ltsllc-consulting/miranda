@@ -17,13 +17,13 @@
 package com.ltsllc.miranda.test;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.JavaKeyStore;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.clcl.PrivateKey;
+import com.ltsllc.clcl.PublicKey;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.*;
-import com.ltsllc.miranda.clientinterface.basicclasses.Matchable;
-import com.ltsllc.miranda.clientinterface.basicclasses.PrivateKey;
-import com.ltsllc.miranda.clientinterface.basicclasses.PublicKey;
+import com.ltsllc.miranda.clientinterface.MirandaException;
+import com.ltsllc.miranda.clientinterface.basicclasses.Equivalent;
 import com.ltsllc.miranda.clientinterface.objects.ClusterStatusObject;
 import com.ltsllc.miranda.clientinterface.objects.NodeStatus;
 import com.ltsllc.miranda.cluster.Cluster;
@@ -55,6 +55,7 @@ import java.io.*;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -65,7 +66,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by Clark on 2/20/2017.
  */
-public class TestCase {
+public class TestCase  {
     private static Gson ourGson = new Gson();
     private static Logger logger = Logger.getLogger(TestCase.class);
 
@@ -313,8 +314,16 @@ public class TestCase {
             }
         }
 
+        long lastTime = file.lastModified();
+
         if (!file.setLastModified(time)) {
             Exception e = new Exception("could not set the time of last modification of " + file);
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        if ((file.lastModified() - time) >= 1000) {
+            Exception e = new Exception("time disprency in touch");
             e.printStackTrace();
             System.exit(1);
         }
@@ -349,11 +358,11 @@ public class TestCase {
         return mockLogger;
     }
 
-    public HttpServer getMockHttpServer () {
+    public HttpServer getMockHttpServer() {
         return mockHttpServer;
     }
 
-    public void reset() {
+    public void reset() throws MirandaException {
         network = null;
         writerQueue = null;
 
@@ -385,7 +394,9 @@ public class TestCase {
         this.mockHttpServer = null;
     }
 
-    public void setup() {
+    public void setup() throws MirandaException {
+        StopState.initializeClass();
+
         network = new LinkedBlockingQueue<Message>();
         writerQueue = new LinkedBlockingQueue<Message>();
 
@@ -415,6 +426,8 @@ public class TestCase {
         this.mockServletHolder = mock(ServletHolder.class);
         this.mockSubscriptionManager = mock(SubscriptionManager.class);
         this.mockHttpServer = mock(HttpServer.class);
+
+        setuplog4j();
     }
 
     public void setupMockNetwork() {
@@ -454,7 +467,7 @@ public class TestCase {
             "</log4j:configuration>",
     };
 
-    public void setupMockHttpServer () {
+    public void setupMockHttpServer() {
         Miranda.getInstance().setHttpServer(getMockHttpServer());
     }
 
@@ -493,6 +506,13 @@ public class TestCase {
         } finally {
             Utils.closeIgnoreExceptions(fileOutputStream);
         }
+    }
+
+    public static void createFile(String filename) {
+        SecureRandom random = new SecureRandom();
+        byte[] contents = new byte[1024];
+        random.nextBytes(contents);
+        createFile(filename, contents);
     }
 
     public static void createFile(String filename, String contents) {
@@ -576,13 +596,12 @@ public class TestCase {
     public static final String TEMP_KEYSTORE = "tempKeyStore";
     public static final String TEMP_KEYSTORE_PASSWORD = "whatever";
 
-    public void setupKeyStore()
-    {
+    public void setupKeyStore() {
         try {
             deleteFile(TEMP_KEYSTORE);
             createFile(TEMP_KEYSTORE, TEMP_KEY_STORE_CONTENTS);
             this.keyStore = Utils.loadKeyStore(TEMP_KEYSTORE, TEMP_KEYSTORE_PASSWORD);
-            Miranda.properties.setProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE,TEMP_KEYSTORE);
+            Miranda.properties.setProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE, TEMP_KEYSTORE);
         } catch (GeneralSecurityException | IOException e) {
             e.printStackTrace();
         }
@@ -621,6 +640,13 @@ public class TestCase {
             f.delete();
 
             if (f.exists()) {
+                pause(1000);
+
+                System.out.println ("Failed first attempt to delete file.");
+                f.delete();
+            }
+
+            if (f.exists()) {
                 logger.error("Failed to delete " + f.getName());
                 Exception e = new Exception();
                 e.printStackTrace();
@@ -646,6 +672,9 @@ public class TestCase {
         }
     }
 
+    public static void pause() {
+        pause(1);
+    }
 
     public boolean contains(Message.Subjects subject, BlockingQueue<Message> queue) {
         for (Message m : queue) {
@@ -683,11 +712,11 @@ public class TestCase {
         Miranda.properties = new MirandaProperties();
     }
 
-    public void setupMiranda() {
+    public void setupMiranda() throws MirandaException {
         new Miranda("-p whatever");
     }
 
-    public static void setupTimer() {
+    public static void setupTimer() throws MirandaException {
         Miranda.timer = new MirandaTimer();
     }
 
@@ -771,10 +800,11 @@ public class TestCase {
         return true;
     }
 
-    public static void setupFileWatcher(int period) {
+    public static void setupFileWatcherService(int period) throws MirandaException {
         Miranda.fileWatcher = new FileWatcherService(period);
         Miranda.fileWatcher.start();
     }
+
 
     public Network getMockNetwork() {
         return mockNetwork;
@@ -784,7 +814,7 @@ public class TestCase {
         return 0 == queue.size();
     }
 
-    public void setupWriter() {
+    public void setupWriter() throws MirandaException {
         com.ltsllc.miranda.writer.Writer writer = new com.ltsllc.miranda.writer.Writer(getMockPublicKey());
 
         this.writerQueue = new LinkedBlockingQueue<Message>();
@@ -819,7 +849,7 @@ public class TestCase {
     }
 
     public void setupMockMiranda() {
-        Miranda.setInstance(mockMiranda);
+        Miranda.setInstance(getMockMiranda());
     }
 
     public void setupMockPanicPolicy() {
@@ -850,22 +880,23 @@ public class TestCase {
         Miranda.getInstance().setWriter(getMockWriter());
     }
 
-    public PublicKey loadPublicKey(String filename, String password, String alias) {
-        String hexString = null;
-        ByteArrayOutputStream byteArrayOutputStream = null;
+    public String loadHexString(String filename) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        FileInputStream fileInputStream = null;
 
         try {
-            KeyStore keyStore = Utils.loadKeyStore(filename, password);
-            JavaKeyStore javaKeyStore = new JavaKeyStore(keyStore);
-            java.security.PublicKey publicKey = javaKeyStore.getPublicKey(alias);
-            return new PublicKey(publicKey);
-        } catch (IOException | GeneralSecurityException e) {
-            e.printStackTrace();
+            fileInputStream = new FileInputStream(filename);
+            int b = fileInputStream.read();
+            while (-1 != b) {
+                byteArrayOutputStream.write(b);
+                b = fileInputStream.read();
+            }
         } finally {
-            Utils.closeIgnoreExceptions(byteArrayOutputStream);
+            Utils.closeIgnoreExceptions(fileInputStream);
         }
 
-        return null;
+        return Utils.bytesToString(byteArrayOutputStream.toByteArray());
     }
 
     public String loadPrivateKey(String filename, String password, String alias) {
@@ -917,19 +948,19 @@ public class TestCase {
         return false;
     }
 
-    public boolean listContains(Matchable matchable, List<Matchable> list) {
-        for (Matchable element : list) {
-            if (element.matches(matchable))
+    public boolean listContains(Equivalent item, List<Equivalent> list) {
+        for (Equivalent element : list) {
+            if (element.isEquivalentTo(item))
                 return true;
         }
 
         return false;
     }
 
-    public boolean listsAreEquivalent(List l1, List l2) {
+    public boolean listsAreEquivalent(List<Equivalent> l1, List<Equivalent> l2) {
         for (Object o : l1) {
-            Matchable matchable = (Matchable) o;
-            if (!listContains(matchable, l2))
+            Equivalent item = (Equivalent) o;
+            if (!listContains(item, l2))
                 return false;
         }
 

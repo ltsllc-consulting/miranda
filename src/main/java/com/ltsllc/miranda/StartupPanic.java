@@ -30,13 +30,14 @@ public class StartupPanic extends Panic {
         ExceptionOpeningKeystore, // an exception was caught trying to open the system Keystore
         ExceptionScanning,
         ExceptionStartingEventManager,
-        ExceptionStartingHttpServer,
+        ExceptionStartingServletContainer,
         ExceptionStartingNetwork, // an exception was thrown while trying to start the network
         ExceptionStartingNetworkListener,
         ExceptionListening,
         ExceptionLoadingProperties,
         ExceptionLoadingKeystore,
         ExceptionWatchingFile,
+        MissingArgument,
         MissingKey, // A key that the system needs is missing from the keystore
         MissingProperty, // A Property that the system requires to start up is missing
         MultipleProperties,
@@ -60,14 +61,14 @@ public class StartupPanic extends Panic {
         return startupReason;
     }
 
-    public StartupPanic (String message, Throwable cause, StartupReasons reason) {
-        super (message, cause, Reasons.Startup);
+    public StartupPanic(String message, Throwable cause, StartupReasons reason) {
+        super(message, cause, Reasons.Startup);
 
         this.startupReason = reason;
     }
 
-    public StartupPanic (String message, StartupReasons reason) {
-        super (message, Reasons.Startup);
+    public StartupPanic(String message, StartupReasons reason) {
+        super(message, Reasons.Startup);
 
         this.startupReason = reason;
     }

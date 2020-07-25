@@ -16,8 +16,8 @@
 
 package com.ltsllc.miranda.property;
 
-import com.ltsllc.common.util.PropertiesUtils;
-import com.ltsllc.common.util.Property;
+import com.ltsllc.commons.util.PropertiesUtils;
+import com.ltsllc.commons.util.Property;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.commadline.MirandaCommandLine;
 import com.ltsllc.miranda.test.TestCase;
@@ -49,7 +49,7 @@ public class TestMirandaProperties extends TestCase {
         return properties;
     }
 
-    public void reset () {
+    public void reset () throws MirandaException {
         super.reset();
     }
 

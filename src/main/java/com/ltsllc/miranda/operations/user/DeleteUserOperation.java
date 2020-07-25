@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.operations.user;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.operations.Operation;
 import com.ltsllc.miranda.session.Session;
@@ -44,7 +45,7 @@ public class DeleteUserOperation extends Operation {
         return subsystems;
     }
 
-    public DeleteUserOperation (BlockingQueue<Message> requester, Session session, String user) {
+    public DeleteUserOperation(BlockingQueue<Message> requester, Session session, String user) throws MirandaException {
         super(NAME, requester, session);
 
         DeleteUserOperationReadyState readyState = new DeleteUserOperationReadyState(this);
@@ -56,14 +57,14 @@ public class DeleteUserOperation extends Operation {
         this.subsystems.add(TopicManager.NAME);
     }
 
-    public void start () {
+    public void start() {
         super.start();
 
         Miranda.getInstance().getTopicManager().sendOwnerQueryMessage(getQueue(), this, getUser());
         Miranda.getInstance().getSubscriptionManager().sendOwnerQueryMessage(getQueue(), this, getUser());
     }
 
-    public void subsystemResponded (String name) {
+    public void subsystemResponded(String name) {
         String subsystem = null;
 
         for (String s : getSubsystems()) {
