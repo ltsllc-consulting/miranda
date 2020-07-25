@@ -16,7 +16,7 @@
 
 package com.ltsllc.miranda.deliveries;
 
-import com.ltsllc.common.util.ImprovedRandom;
+import com.ltsllc.commons.util.ImprovedRandom;
 import com.ltsllc.miranda.clientinterface.basicclasses.Delivery;
 import com.ltsllc.miranda.clientinterface.basicclasses.Event;
 import com.ltsllc.miranda.clientinterface.basicclasses.Subscription;
@@ -70,7 +70,7 @@ public class TestDelivery extends TestCase {
     }
 
     @Test
-    public void testMerge () {
+    public void testMerge () throws IOException {
         ImprovedRandom improvedRandom = new ImprovedRandom();
 
         Delivery delivery = Delivery.createRandomDelivery(improvedRandom);

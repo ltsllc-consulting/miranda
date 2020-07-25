@@ -16,9 +16,10 @@
 
 package com.ltsllc.miranda.clientinterface.basicclasses;
 
+
 import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.clcl.PublicKey;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.MirandaUncheckedException;
 import com.ltsllc.miranda.clientinterface.objects.UserObject;
 
@@ -113,13 +114,15 @@ public class User extends MirandaObject {
     private PublicKey publicKey;
 
     @Override
-    public void copyFrom(Mergeable mergeable) {
+    public void copyFrom(Mergeable mergeable)
+            throws IOException
+    {
         User other = (User) mergeable;
 
         this.name = other.name;
         this.category = other.category;
         this.description = other.description;
-        this.publicKey = new PublicKey(other.publicKey);
+        this.publicKey = new PublicKey(other.getPublicKey().getSecurityPublicKey());
     }
 
     @Override

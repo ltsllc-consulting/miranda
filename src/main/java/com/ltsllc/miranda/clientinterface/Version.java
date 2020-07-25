@@ -20,7 +20,7 @@ package com.ltsllc.miranda.clientinterface;
  * Created by Clark on 2/6/2017.
  */
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 
 import java.security.NoSuchAlgorithmException;
 

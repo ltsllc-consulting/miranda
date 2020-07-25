@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -70,7 +71,7 @@ public class TestSingleFileSyncingState extends TestCase {
 
 
     @Test
-    public void testProcessGetFileResponse () throws MirandaException {
+    public void testProcessGetFileResponse () throws MirandaException, IOException {
         GetFileResponseMessage getFileResponseMessage = new GetFileResponseMessage(null, this, "whatever");
         getUsersFileSyncingState().processMessage(getFileResponseMessage);
 

@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.servlet.user;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.results.Results;
@@ -121,7 +122,7 @@ public class UserHolder extends ServletHolder {
         wake();
     }
 
-    public User getUser(String name) throws TimeoutException {
+    public User getUser(String name) throws TimeoutException, EncryptionException {
         setUser(null);
         Miranda.getInstance().getUserManager().sendGetUserMessage(getQueue(), this, name);
 

@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.servlet.user;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.clientinterface.basicclasses.User;
 import com.ltsllc.miranda.clientinterface.objects.ReadObject;
 import com.ltsllc.miranda.clientinterface.requests.UserRequest;
@@ -36,12 +37,18 @@ public class ReadUserServlet extends UserServlet {
     }
 
     public ReadObject basicService(HttpServletRequest request, HttpServletResponse response,
-                                   UserRequest requestObject) throws ServletException, IOException, TimeoutException {
-        UserHolder.getInstance().getUser(requestObject.getUser().getName());
-        ReadObject<User> readObject = new ReadObject<User>();
-        readObject.setResult(UserHolder.getInstance().getGetUserResults());
-        readObject.setObject(UserHolder.getInstance().getUser());
+                                   UserRequest requestObject)
+            throws ServletException, IOException, TimeoutException
+    {
+        try {
+            UserHolder.getInstance().getUser(requestObject.getUser().getName());
+            ReadObject<User> readObject = new ReadObject<User>();
+            readObject.setResult(UserHolder.getInstance().getGetUserResults());
+            readObject.setObject(UserHolder.getInstance().getUser());
 
-        return readObject;
+            return readObject;
+        } catch (EncryptionException encryptionException) {
+            throw new ServletException(encryptionException);
+        }
     }
 }

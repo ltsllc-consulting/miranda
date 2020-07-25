@@ -19,8 +19,8 @@ package com.ltsllc.miranda.test;
 import com.google.gson.Gson;
 import com.ltsllc.clcl.PrivateKey;
 import com.ltsllc.clcl.PublicKey;
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.*;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.clientinterface.basicclasses.Equivalent;
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by Clark on 2/20/2017.
  */
-public class TestCase extends com.ltsllc.common.test.TestCase {
+public class TestCase  {
     private static Gson ourGson = new Gson();
     private static Logger logger = Logger.getLogger(TestCase.class);
 

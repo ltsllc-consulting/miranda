@@ -2,10 +2,14 @@ package com.ltsllc.miranda.truststore;
 
 import com.ltsllc.clcl.*;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +19,8 @@ public class Truststore {
     private PrivateKey privateKey;
     private PublicKey publicKey;
     private boolean loaded;
+    private String filename;
+    private String password;
 
     public static final String ALIAS = "private";
 
@@ -24,6 +30,22 @@ public class Truststore {
 
     public void setLoaded(boolean loaded) {
         this.loaded = loaded;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public KeyStore getKeyStore() {
@@ -64,13 +86,15 @@ public class Truststore {
         Date aYearFromNow = calendar.getTime();
 
         Certificate certificate = keyPair.getPrivateKey().sign(certificateSigningRequest, now, aYearFromNow);
-        certificate.store(certificateFilename);
+
+
 
         return truststore;
     }
 
     public Truststore(KeyPair keyPair, String filename, String passwordString)
-            throws GeneralSecurityException, EncryptionException, IOException {
+            throws GeneralSecurityException, EncryptionException, IOException, FileNotFoundException
+    {
         String password = "";
 
         if (passwordString != null)
@@ -99,5 +123,21 @@ public class Truststore {
         FileOutputStream fileOutputStream = new FileOutputStream(filename);
         keyStore.store(fileOutputStream, password.toCharArray());
         fileOutputStream.close();
+    }
+
+    public void store()
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException
+    {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(getFilename());
+            keyStore.store(fileOutputStream, getPassword().toCharArray());
+        }
+        finally {
+            if (fileOutputStream != null)
+                fileOutputStream.close();
+        }
     }
 }

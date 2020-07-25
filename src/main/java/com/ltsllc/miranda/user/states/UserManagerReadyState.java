@@ -34,6 +34,7 @@ import com.ltsllc.miranda.user.UserManager;
 import com.ltsllc.miranda.user.messages.*;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -179,7 +180,7 @@ public class UserManagerReadyState extends StandardManagerReadyState<User> {
         try {
             getUserManager().updateUser(updateUserMessage.getUser());
             result = Results.Success;
-        } catch (MirandaException e) {
+        } catch (MirandaException| IOException e) {
             result = Results.Exception;
         }
 
@@ -241,6 +242,8 @@ public class UserManagerReadyState extends StandardManagerReadyState<User> {
             logger.error("Asked to update unknown user " + userUpdatedMessage.getUser().getName());
         } catch (MergeException e) {
             logger.error("Exception while merging", e);
+        } catch (IOException e) {
+            logger.error("Exception while updating user",e);
         }
 
         getUserManager().getUsersFile().sendUpdateObjectsMessage(getUserManager().getQueue(), this,

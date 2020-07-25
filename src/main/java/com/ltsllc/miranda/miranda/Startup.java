@@ -17,8 +17,8 @@
 package com.ltsllc.miranda.miranda;
 
 import com.ltsllc.clcl.*;
-import com.ltsllc.common.util.PropertiesUtils;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.PropertiesUtils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.*;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.cluster.Cluster;
@@ -330,7 +330,7 @@ public class Startup extends State {
             checkProperties(MirandaProperties.PROPERTY_KEYSTORE_FILE, MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
             String keyStoreFilename = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_FILE);
 
-            JavaKeyStore javaKeyStore = new JavaKeyStore(keyStoreFilename, password, distinguishedName);
+            JavaKeyStore javaKeyStore = new JavaKeyStore(keyStoreFilename, password);
 
             String alias = getProperties().getProperty(MirandaProperties.PROPERTY_KEYSTORE_PRIVATE_KEY_ALIAS);
             KeyPair keyPair = javaKeyStore.getKeyPair(alias);

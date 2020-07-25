@@ -16,12 +16,13 @@
 
 package com.ltsllc.miranda.clientinterface.basicclasses;
 
-import com.ltsllc.common.util.ImprovedRandom;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.ImprovedRandom;
+import com.ltsllc.commons.util.Utils;
 
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -182,11 +183,13 @@ public class Event extends MirandaObject implements DirectoryEntry, Evictable {
         Event other = (Event) mergeable;
         guid = other.guid;
         topicName = other.topicName;
-        content = Utils.copy(other.content);
+        Arrays.copyOf(other.content, other.content.length);
         userName = other.userName;
         timeOfCreation = other.timeOfCreation;
         method = other.method;
-        awaitingDelivery = Utils.copy(other.awaitingDelivery);
+        List list = new ArrayList();
+        list.addAll(other.awaitingDelivery);
+        awaitingDelivery = list;
     }
 
     public long getTimeOfCreation() {

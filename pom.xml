@@ -33,16 +33,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
                     <fork>true</fork>
@@ -142,14 +132,5 @@
             <version>1.7.25</version>
         </dependency>
 
-        <!-- rt.jar -->
-
-        <dependency>
-            <groupId>sun.jdk</groupId>
-            <artifactId>rt.jar</artifactId>
-            <version>1.8</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/lib/rt.jar</systemPath>
-        </dependency>
     </dependencies>
 </project>

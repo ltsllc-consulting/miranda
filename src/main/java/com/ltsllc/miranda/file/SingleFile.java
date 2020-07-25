@@ -18,7 +18,7 @@ package com.ltsllc.miranda.file;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.Panic;
 import com.ltsllc.miranda.Version;
@@ -209,7 +209,9 @@ abstract public class SingleFile<E extends MirandaObject> extends MirandaFile im
         sendToMe(loadMessage);
     }
 
-    public boolean merge(List list) {
+    public boolean merge(List list)
+            throws IOException
+    {
         List<E> newItems = new ArrayList<E>();
         boolean changed = false;
 
@@ -300,7 +302,7 @@ abstract public class SingleFile<E extends MirandaObject> extends MirandaFile im
         write();
     }
 
-    public void updateObjects(List<E> updatedObjects) throws MergeException {
+    public void updateObjects(List<E> updatedObjects) throws MergeException,IOException {
         for (E updatedObject : updatedObjects) {
             update(updatedObject);
         }
@@ -310,7 +312,7 @@ abstract public class SingleFile<E extends MirandaObject> extends MirandaFile im
         write();
     }
 
-    public void update(E updatedObject) throws MergeException {
+    public void update(E updatedObject) throws MergeException,IOException {
         E existingObject = (E) find(updatedObject);
 
         if (null == existingObject) {

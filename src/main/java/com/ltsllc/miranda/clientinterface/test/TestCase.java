@@ -1,6 +1,6 @@
 package com.ltsllc.miranda.clientinterface.test;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

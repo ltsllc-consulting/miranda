@@ -202,7 +202,7 @@ public class TestClusterFile extends TestCase {
     }
 
     @Test
-    public void testMergeNewElement () {
+    public void testMergeNewElement () throws IOException {
         NodeElement newElement = new NodeElement("bar.com", 6789, "a new element");
         List<NodeElement> newElementList = new ArrayList<NodeElement>();
         newElementList.add(newElement);
@@ -212,6 +212,7 @@ public class TestClusterFile extends TestCase {
         Version oldVersion = getClusterFile().getVersion();
 
         getClusterFile().merge(newElementList);
+
 
         Version newVersion = getClusterFile().getVersion();
 

@@ -1,6 +1,8 @@
 package com.ltsllc.miranda.clientinterface.basicclasses;
 
-import com.ltsllc.common.util.ImprovedRandom;
+import com.ltsllc.commons.util.ImprovedRandom;
+
+import java.io.IOException;
 
 /**
  * An Object that can be merged with another object.
@@ -31,7 +33,7 @@ public abstract class Mergeable {
      * @param mergeable Another non-null instance that this object should copy from.  The object should be of the same
      *                  type as this instance --- casting to the type of the receiver should work.
      */
-    abstract public void copyFrom(Mergeable mergeable);
+    abstract public void copyFrom(Mergeable mergeable) throws IOException;
 
     private Long lastChange;
 
@@ -57,7 +59,9 @@ public abstract class Mergeable {
         this.lastChange = random.nextNonNegativeLong();
     }
 
-    public boolean merge(Mergeable other) {
+    public boolean merge(Mergeable other)
+            throws IOException
+    {
         if (changedAfter(other))
             return false;
 

@@ -34,10 +34,14 @@ public class TestKey extends EncryptionTestCase {
 
 
     @Before
-    public void setup () throws Exception {
-        KeyPair keyPair = KeyPair.newKeys(TEST_DISTINGUISHED_NAME);
-        setPublicKey(keyPair.getPublicKey());
-        setPrivateKey(keyPair.getPrivateKey());
+    public void setup () {
+        try {
+            KeyPair keyPair = KeyPair.newKeys();
+            setPublicKey(keyPair.getPublicKey());
+            setPrivateKey(keyPair.getPrivateKey());
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     public static boolean containsBouncyCastleProvider (Provider[] providers) {

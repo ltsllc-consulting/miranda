@@ -1,6 +1,6 @@
 package com.ltsllc.miranda.clientinterface.basicclasses;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class DeadLetterQueue extends MirandaObject {
 
         DeadLetterQueue other = (DeadLetterQueue) o;
 
-        return Utils.StringListsAreEquivalent(events, other.events);
+        return Utils.stringListsAreEquivalent(events, other.events);
     }
 
     @Override

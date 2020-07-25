@@ -17,7 +17,7 @@
 package com.ltsllc.miranda.node.networkMessages;
 
 import com.google.gson.Gson;
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.Version;
 import com.ltsllc.miranda.clientinterface.basicclasses.NodeElement;
 

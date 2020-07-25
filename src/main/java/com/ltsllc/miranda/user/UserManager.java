@@ -16,6 +16,7 @@
 
 package com.ltsllc.miranda.user;
 
+import com.ltsllc.clcl.EncryptionException;
 import com.ltsllc.miranda.Message;
 import com.ltsllc.miranda.State;
 import com.ltsllc.miranda.clientinterface.MirandaException;
@@ -123,7 +124,7 @@ public class UserManager extends StandardManager<User> {
         sendToMe(deleteUserMessage);
     }
 
-    public void updateUser(UserObject userObject) throws MirandaException {
+    public void updateUser(UserObject userObject) throws MirandaException, IOException {
         User existingUser = getUser(userObject.getName());
 
         if (null == existingUser)
@@ -133,7 +134,7 @@ public class UserManager extends StandardManager<User> {
         existingUser.merge(user);
     }
 
-    public void updateUser(User user) throws UnknownUserException, MergeException {
+    public void updateUser(User user) throws UnknownUserException, MergeException, IOException {
         User existingUser = getUser(user.getName());
 
         if (null == existingUser) {
@@ -143,7 +144,9 @@ public class UserManager extends StandardManager<User> {
         }
     }
 
-    public void sendGetUserMessage(BlockingQueue<Message> senderQueue, Object sender, String name) {
+    public void sendGetUserMessage(BlockingQueue<Message> senderQueue, Object sender, String name)
+            throws EncryptionException
+    {
         GetUserMessage getUserMessage = new GetUserMessage(senderQueue, sender, name);
         sendToMe(getUserMessage);
     }

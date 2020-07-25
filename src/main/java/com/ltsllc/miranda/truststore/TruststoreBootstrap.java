@@ -23,18 +23,21 @@ public class TruststoreBootstrap {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        com.ltsllc.clcl.KeyPair clcKeyPair = new com.ltsllc.clcl.KeyPair(keyPair, distinguishedName);
+        PublicKey publicKey = new PublicKey(keyPair.getPublic());
+        PrivateKey privateKey = new PrivateKey(keyPair.getPrivate());
+        com.ltsllc.clcl.KeyPair clclKeyPair = new com.ltsllc.clcl.KeyPair(publicKey, privateKey);
 
-        new Truststore(clcKeyPair, keystoreFilename, password);
+        new Truststore(clclKeyPair, keystoreFilename, password);
 
         CertificateSigningRequest certificateSigningRequest =
-                clcKeyPair.getPublicKey().createCertificateSigningRequest(clcKeyPair.getPrivateKey());
+                clclKeyPair.getPublicKey().createCertificateSigningRequest(clclKeyPair.getPrivateKey());
 
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.YEAR, 1);
         Date aYearFromNow = calendar.getTime();
-        Certificate certificate = clcKeyPair.getPrivateKey().sign(certificateSigningRequest, now, aYearFromNow);
+
+        Certificate certificate = clclKeyPair.getPrivateKey().sign(certificateSigningRequest, now, aYearFromNow);
         certificate.store(certificateFilename);
     }
 }

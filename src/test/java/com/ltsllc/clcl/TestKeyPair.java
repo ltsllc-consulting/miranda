@@ -21,6 +21,8 @@ import com.ltsllc.clcl.test.EncryptionTestCase;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.security.GeneralSecurityException;
+
 public class TestKeyPair extends EncryptionTestCase {
     public static final String TEST_PASSWORD = "whatever";
     public static final String TEST_DISTINGUISHED_NAME
@@ -28,8 +30,12 @@ public class TestKeyPair extends EncryptionTestCase {
 
 
     @Before
-    public void setup () throws EncryptionException {
-        createKeyPair(TEST_DISTINGUISHED_NAME);
+    public void setup () {
+        try {
+            createKeyPair(1024);
+        } catch (GeneralSecurityException generalSecurityException) {
+            throw new RuntimeException(generalSecurityException);
+        }
     }
 
     @Test

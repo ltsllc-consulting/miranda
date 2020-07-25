@@ -16,8 +16,7 @@
 
 package com.ltsllc.miranda.clientinterface.basicclasses;
 
-import com.ltsllc.common.util.ImprovedRandom;
-
+import com.ltsllc.commons.util.ImprovedRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,7 +33,7 @@ public class NodeElement extends MirandaObject {
 
     public NodeElement(ImprovedRandom random) {
         this.dns = randomDnsName(random);
-        this.port = random.nextNonNegativeInteger();
+        this.port = random.nextNonNegativeInt();
         this.description = random.randomString(16);
 
         if (random.nextBoolean())

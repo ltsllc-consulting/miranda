@@ -18,7 +18,7 @@
 package com.ltsllc.clcl.test;
 
 import com.ltsllc.clcl.*;
-import com.ltsllc.common.test.TestCase;
+import com.ltsllc.miranda.test.TestCase;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyPairGenerator;
@@ -40,8 +40,8 @@ public class EncryptionTestCase extends TestCase {
         this.keyPair = keyPair;
     }
 
-    public void createKeyPair(String distinguishedName) throws EncryptionException {
-        this.keyPair = KeyPair.newKeys(distinguishedName);
+    public void creaateKeyPair () throws EncryptionException {
+        this.keyPair = KeyPair.newKeys();
     }
 
     public Certificate getCertificate() {
@@ -76,7 +76,7 @@ public class EncryptionTestCase extends TestCase {
         this.publicKey = publicKey;
     }
 
-    public static DistinguishedName createDn() {
+    public static DistinguishedName createDn () {
         DistinguishedName dn = new DistinguishedName();
 
         dn.setCountryCode("US");
@@ -89,7 +89,7 @@ public class EncryptionTestCase extends TestCase {
         return dn;
     }
 
-    public KeyPair createKeyPair(int keySize, String distinguishedName) throws GeneralSecurityException {
+    public KeyPair createKeyPair (int keySize) throws GeneralSecurityException {
         DistinguishedName dn = createDn();
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -104,11 +104,11 @@ public class EncryptionTestCase extends TestCase {
         setPublicKey(publicKey);
         setPrivateKey(privateKey);
 
-        return new KeyPair(publicKey, privateKey, distinguishedName);
+        return new KeyPair(publicKey, privateKey);
     }
 
-    public Certificate createCertificate(String distinguishedName) throws GeneralSecurityException, EncryptionException {
-        KeyPair keyPair = createKeyPair(2048, distinguishedName);
+    public Certificate createCertificate () throws GeneralSecurityException, EncryptionException {
+        KeyPair keyPair = createKeyPair(2048);
 
         CertificateSigningRequest csr = keyPair.createCertificateSigningRequest();
 

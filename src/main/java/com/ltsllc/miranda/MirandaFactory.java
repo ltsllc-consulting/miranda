@@ -16,7 +16,7 @@
 
 package com.ltsllc.miranda;
 
-import com.ltsllc.common.util.Utils;
+import com.ltsllc.commons.util.Utils;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.http.HttpServer;
 import com.ltsllc.miranda.http.JettyHttpServer;

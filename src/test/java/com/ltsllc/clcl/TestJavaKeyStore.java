@@ -18,7 +18,7 @@
 package com.ltsllc.clcl;
 
 import com.ltsllc.clcl.test.EncryptionTestCase;
-import com.ltsllc.common.test.TestCase;
+import com.ltsllc.commons.test.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class TestJavaKeyStore extends EncryptionTestCase {
 
     @After
     public void cleanup () {
-        delete(TEST_FILENAME);
+        deleteFile(TEST_FILENAME);
     }
 
     // also tests load, store, initialize and extract
@@ -70,7 +70,7 @@ public class TestJavaKeyStore extends EncryptionTestCase {
         publicKey.setDn(dn);
         PrivateKey privateKey = new PrivateKey(keyPair.getPrivate());
         privateKey.setDn(dn);
-        KeyPair keyPair2 = new KeyPair(publicKey, privateKey, TEST_DISTINGUISHED_NAME);
+        KeyPair keyPair2 = new KeyPair(publicKey, privateKey);
 
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
@@ -89,7 +89,7 @@ public class TestJavaKeyStore extends EncryptionTestCase {
         getJavaKeyStore().setPasswordString(TEST_PASSWORD);
         getJavaKeyStore().store();
 
-        getJavaKeyStore().load(TEST_DISTINGUISHED_NAME);
+        getJavaKeyStore().load();
 
         KeyPair returnedValue = getJavaKeyStore().getKeyPair(TEST_ALIAS);
         assert (keyPair2.equals(returnedValue));
@@ -97,7 +97,7 @@ public class TestJavaKeyStore extends EncryptionTestCase {
 
     @Test
     public void testAddCertificate () throws Exception {
-        Certificate certificate = createCertificate(TEST_DISTINGUISHED_NAME);
+        Certificate certificate = createCertificate();
         getJavaKeyStore().add(TEST_ALIAS, certificate);
 
         Certificate anotherCert = getJavaKeyStore().getCertificate(TEST_ALIAS);
@@ -108,12 +108,12 @@ public class TestJavaKeyStore extends EncryptionTestCase {
     // This also tests load, store, initialize, extract, extractCertificates and getCertificate
     @Test
     public void testAddCertificates () throws Exception{
-        Certificate certificate = createCertificate(TEST_DISTINGUISHED_NAME);
+        Certificate certificate = createCertificate();
         getJavaKeyStore().setPasswordString(TEST_PASSWORD);
         getJavaKeyStore().add(TEST_ALIAS, certificate);
         getJavaKeyStore().store();
 
-        getJavaKeyStore().load(TEST_DISTINGUISHED_NAME);
+        getJavaKeyStore().load();
 
         Certificate otherCertificate = getJavaKeyStore().getCertificate(TEST_ALIAS);
         assert (otherCertificate.equals(certificate));
