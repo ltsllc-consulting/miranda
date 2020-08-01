@@ -132,5 +132,22 @@
             <version>1.7.25</version>
         </dependency>
 
+        <!-- commons -->
+        <dependency>
+            <groupId>com.ltsllc</groupId>
+            <artifactId>commons</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/Clark/IdeaProjects/commons/out/artifacts/commons_1_0_SNAPSHOT_jar/commons.jar</systemPath>
+        </dependency>
+
+        <!-- clcl -->
+        <dependency>
+            <groupId>com.ltsllc</groupId>
+            <artifactId>clcl</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/Clark/IdeaProjects/clcl2/out/artifacts/clcl2_jar/clcl2.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
