@@ -20,13 +20,13 @@ To install miranda follow these steps:
 9) Import the node certificate to the keystore
 10) Run miranda
 
-Download the distribution(s)
+###Download the distribution(s)
 
 Download miranda from github at
 
 https://github.com/ClarkHobbie/miranda
 
-Compile miranda
+###Compile miranda
 
 miranda uses maven for builds.  Compile it with the following command:
 
@@ -36,35 +36,35 @@ Assuming everything went OK, you should have the file
 
 target\miranda-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
-Create a Certificate Authority
+###Create a Certificate Authority
 
 openssl req -config config -newkey rsa:2048 -x509 -keyout ca-key.pem.txt -out ca-certificate.pem.txt -days 365
 
-Create a tuststore
+###Create a tuststore
 
 keytool -import -keystore truststore -file ca-certificate.pem.txt -alias ca -keyalg rsa -storepass whatever
 
-Generate keys for the miranda node
+###Generate keys for the miranda node
 
 keytool -genkeypair -keystore keystore -storepass whatever -alias private -keyalg rsa
 
-Generate a certificate signing request for the Miranda node
+###Generate a certificate signing request for the Miranda node
 
 keytool -certreq -keystore keystore -storepass whatever -alias private -file private.csr
 
-Sign the certificate signing request for the Miranda node with the certificate authority
+###Sign the certificate signing request for the Miranda node with the certificate authority
 
 openssl x509 -req -CA ca-certificate.pem.txt -CAkey ca-key.pem.txt -in private.csr -out private.cer  -days 365 -CAcreateserial
 
-Import the certificate authority to the keystore
+###Import the certificate authority to the keystore
 
 keytool -import -keystore keystore -storepass whatever -file ca-certificate.pem.txt -alias ca
 
-Import the Miranda node certificate to the keystore
+###Import the Miranda node certificate to the keystore
 
 keytool -import -keystore keystore -storepass whatever -file private.cer -alias certificate
 
-Run miranda
+###Run miranda
 
 You should be able to run Miranda with the following command:
 
