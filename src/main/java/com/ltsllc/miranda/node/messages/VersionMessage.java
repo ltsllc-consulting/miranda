@@ -17,6 +17,7 @@
 package com.ltsllc.miranda.node.messages;
 
 import com.ltsllc.miranda.Message;
+import com.ltsllc.miranda.Version;
 import com.ltsllc.miranda.node.NameVersion;
 
 import java.util.concurrent.BlockingQueue;
@@ -31,7 +32,10 @@ public class VersionMessage extends Message {
         return nameVersion;
     }
 
-
+    public Version getVersion () {
+        return version;
+    }
+    
     public VersionMessage(BlockingQueue<Message> senderQueue, Object sender, NameVersion nameVersion) {
         super(Subjects.Version, senderQueue, sender);
 

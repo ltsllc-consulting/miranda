@@ -16,6 +16,8 @@
 
 package com.ltsllc.miranda;
 
+import com.ltsllc.miranda.actions.Action;
+import com.ltsllc.miranda.actions.Action2;
 import com.ltsllc.miranda.clientinterface.MirandaException;
 import com.ltsllc.miranda.miranda.Miranda;
 import com.ltsllc.miranda.miranda.messages.StopMessage;
@@ -34,8 +36,26 @@ import java.util.concurrent.BlockingQueue;
 public abstract class State {
     private static Logger logger = Logger.getLogger(State.class);
 
+    public Action2 entryAction;
+    public Action2 exitAction;
     public Consumer container;
     private List<Message> deferredQueue;
+
+    public Action2 getEntryAction() {
+        return entryAction;
+    }
+
+    public void setEntryAction(Action2 entryAction) {
+        this.entryAction = entryAction;
+    }
+
+    public Action2 getExitAction() {
+        return exitAction;
+    }
+
+    public void setExitAction(Action2 exitAction) {
+        this.exitAction = exitAction;
+    }
 
     public List<Message> getDeferredQueue() {
         return deferredQueue;
@@ -64,6 +84,9 @@ public abstract class State {
 
     public State start() {
         logger.info(getContainer() + " starting");
+        if (getEntryAction() != null)
+            getEntryAction().action(null, null);
+
         return this;
     }
 

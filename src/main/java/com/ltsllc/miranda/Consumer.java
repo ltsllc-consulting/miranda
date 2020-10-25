@@ -163,9 +163,8 @@ public class Consumer extends Subsystem implements Comparer {
 
     public Message getNextMessage() {
         Message nextMessage = null;
-        boolean keepWaiting = true;
 
-        while (null == nextMessage && keepWaiting) {
+        while (null == nextMessage) {
             try {
                 nextMessage = getQueue().take();
             } catch (InterruptedException e) {

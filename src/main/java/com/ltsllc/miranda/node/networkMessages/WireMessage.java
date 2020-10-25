@@ -38,6 +38,7 @@ public class WireMessage {
         GetSubscriptionsFile,
         GetTopicsFile,
         GetUsersFile,
+        GetVersion,
         GetVersions,
         Join,
         JoinResponse,

@@ -42,7 +42,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.ltsllc:clcl:1.0">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../clcl2/out/artifacts/clcl2_jar/clcl2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../clcl/out/artifacts/clcl_jar/clcl.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
